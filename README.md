@@ -26,7 +26,10 @@ from London Heathrow Airport to Istanbul Atatürk Airport which will take place 
 where it will also exclude the flights which are not direct with the prices for one adult.
 
 ``` php
+use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
+
 $pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+
 $pricing->setParameters([
     'adults' => 1,
     'destinationplace' => 'IST',
@@ -34,6 +37,7 @@ $pricing->setParameters([
     'outbounddate' => Carbon::now()->addWeek(1)->format('Y-m-d'),
     'stops' => 0
 ]);
+
 $flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
 ```
 
