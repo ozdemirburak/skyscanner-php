@@ -23,7 +23,7 @@ $ composer require ozdemirburak/skyscanner-php
 
 With the minimal setup, the Live Pricing Service can be used like below where it will return the flights 
 from London Heathrow Airport to Istanbul Atatürk Airport which will take place in 1 week later from today
-where it will also exclude the flights which are not direct with the prices for one person.
+where it will also exclude the flights which are not direct with the prices for one adult.
 
 ``` php
 $pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
