@@ -90,6 +90,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithNonStop()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $this->assertNotEmpty($pricing->parseFlights());
     }
@@ -99,6 +100,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithMultipleStops()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $pricing->setParameters(['stops' => 2]);
         $this->assertNotEmpty($pricing->parseFlights());
@@ -109,6 +111,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithNonStop()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights());
@@ -119,6 +122,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithMultipleStops()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $pricing->setParameters(['stops' => 2, 'inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights());
@@ -129,6 +133,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithMultipleStopsWithoutCheapestFlights()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $pricing->setParameters(['stops' => 2]);
         $this->assertNotEmpty($pricing->parseFlights(false));
@@ -139,6 +144,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithNonStopWithoutCheapestFlights()
     {
+        sleep(30);
         $pricing = new LivePricing($this->apiKey);
         $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights(false));
