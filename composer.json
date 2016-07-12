@@ -1,0 +1,44 @@
+{
+    "name": "ozdemirburak/skyscanner-php",
+    "description": "Unoffical SkyScanner PHP API",
+    "keywords": [
+        "skyscanner",
+        "php",
+        "api",
+        "sdk"
+    ],
+    "homepage": "https://github.com/ozdemirburak/skyscanner-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Burak Özdemir",
+            "email": "mail@burakozdemir.co.uk",
+            "homepage": "https://burakozdemir.co.uk",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php" : ">=5.6.0",
+        "guzzlehttp/guzzle": "~6.0",
+        "nesbot/carbon": "~1.21",
+        "symfony/console": "~2.8",
+        "symfony/var-dumper": "~2.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit" : "4.*",
+        "scrutinizer/ocular": "~1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "OzdemirBurak\\SkyScanner\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OzdemirBurak\\SkyScanner\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
