@@ -40,7 +40,7 @@ $flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
 After calling the `parseFlights()` method, some part of the data that is returned will look like below where it will
 only return the agent with the lowest price.
 
-```
+``` php
 0 => array:2 [
   "outbound_leg" => array:8 [
     "id" => "13554-1607191020-BA-0-12585-1607191620"
@@ -83,7 +83,7 @@ that the `agent` property has.
 Furthermore, if you also indicate the `inbounddate` variable, then it will also return the `inbound_leg` just as the
 same as the outbound leg.
 
-```
+``` php
 0 => array:3 [
   "agents" => array:20 [
     0 => array:9 [ …9]
