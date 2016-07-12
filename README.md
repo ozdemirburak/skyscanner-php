@@ -42,267 +42,266 @@ All the variable names are the same as indicated within the SkyScanner API docum
 The initial parameters are the ones needed in the all API calls.
 
 ``` php
+/**
+ * ISO country code, or specified location schema
+ *
+ * @link https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
+ *
+ * @var string
+ */
+protected $country = 'GB';
 
-    /**
-     * ISO country code, or specified location schema
-     *
-     * @link https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
-     *
-     * @var string
-     */
-    protected $country = 'GB';
+/**
+ * ISO currency code
+ *
+ * @link https://en.wikipedia.org/wiki/ISO_4217#Active_codes
+ *
+ * @var string
+ */
+protected $currency = 'GBP';
 
-    /**
-     * ISO currency code
-     *
-     * @link https://en.wikipedia.org/wiki/ISO_4217#Active_codes
-     *
-     * @var string
-     */
-    protected $currency = 'GBP';
-
-    /**
-     * ISO locale code (language and country)
-     *
-     * @link https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx
-     *
-     * @var string
-     */
-    protected $locale = 'en-GB';
+/**
+ * ISO locale code (language and country)
+ *
+ * @link https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx
+ *
+ * @var string
+ */
+protected $locale = 'en-GB';
 ```
 
 The parameters specified below are specific to Live Pricing Service.
 
 ``` php
 
-    /**
-     * The number of adult passengers
-     *
-     * @var int
-     */
-    protected $adults = 1;
+/**
+ * The number of adult passengers
+ *
+ * @var int
+ */
+protected $adults = 1;
 
-    /**
-     * The Cabin Class
-     *
-     * Supported values are: Economy, PremiumEconomy, Business, First
-     *
-     * @var string
-     */
-    protected $cabinclass = 'Economy';
+/**
+ * The Cabin Class
+ *
+ * Supported values are: Economy, PremiumEconomy, Business, First
+ *
+ * @var string
+ */
+protected $cabinclass = 'Economy';
 
-    /**
-     * The code schema to use for carriers
-     *
-     * Supported values are: Iata, Icao, Skyscanner
-     *
-     * @var string
-     */
-    protected $carrierschema = 'Iata';
-    
-    /**
-     * The number of children
-     *
-     * @var int
-     */
-    protected $children = 0;
+/**
+ * The code schema to use for carriers
+ *
+ * Supported values are: Iata, Icao, Skyscanner
+ *
+ * @var string
+ */
+protected $carrierschema = 'Iata';
 
-    /**
-     * Destination airports to filter on
-     *
-     * List of airport codes delimited by ';'
-     *
-     * @var string
-     */
-    protected $destinationairports;
+/**
+ * The number of children
+ *
+ * @var int
+ */
+protected $children = 0;
 
-    /**
-     * The destination city or airport
-     *
-     * Specified location schema, or Skyscanner Rnid
-     *
-     * @var string
-     */
-    protected $destinationplace = 'IST';
+/**
+ * Destination airports to filter on
+ *
+ * List of airport codes delimited by ';'
+ *
+ * @var string
+ */
+protected $destinationairports;
 
-    /**
-     * Filter for maximum duration in minutes
-     *
-     * Supported values are: Between 0 and 1800
-     *
-     * @var int
-     */
-    protected $duration;
+/**
+ * The destination city or airport
+ *
+ * Specified location schema, or Skyscanner Rnid
+ *
+ * @var string
+ */
+protected $destinationplace = 'IST';
 
-    /**
-     * Filter flights by any but the specified carriers
-     *
-     * Must be semicolon-separated Iata carrier codes.
-     *
-     * @link http://www.iata.org/publications/Pages/code-search.aspx
-     *
-     * @var string
-     */
-    protected $excludecarriers;
+/**
+ * Filter for maximum duration in minutes
+ *
+ * Supported values are: Between 0 and 1800
+ *
+ * @var int
+ */
+protected $duration;
 
-    /**
-     * Show price-per-adult (false), or price for all passengers (true)
-     *
-     * @var bool
-     */
-    protected $groupPricing = false;
+/**
+ * Filter flights by any but the specified carriers
+ *
+ * Must be semicolon-separated Iata carrier codes.
+ *
+ * @link http://www.iata.org/publications/Pages/code-search.aspx
+ *
+ * @var string
+ */
+protected $excludecarriers;
 
-    /**
-     * The return date
-     *
-     * Formatted as YYYY-mm-dd
-     *
-     * @var string
-     */
-    protected $inbounddate;
+/**
+ * Show price-per-adult (false), or price for all passengers (true)
+ *
+ * @var bool
+ */
+protected $groupPricing = false;
 
-    /**
-     * Filter for end of range for inbound departure time
-     *
-     * Formatted as 'hh:mm'
-     *
-     * @var string
-     */
-    protected $inbounddepartendtime;
+/**
+ * The return date
+ *
+ * Formatted as YYYY-mm-dd
+ *
+ * @var string
+ */
+protected $inbounddate;
 
-    /**
-     * Filter for start of range for inbound departure time
-     *
-     * Formatted as 'hh:mm'
-     *
-     * @var string
-     */
-    protected $inbounddepartstarttime;
+/**
+ * Filter for end of range for inbound departure time
+ *
+ * Formatted as 'hh:mm'
+ *
+ * @var string
+ */
+protected $inbounddepartendtime;
 
-    /**
-     * Filter for inbound departure time by time period of the day (i.e. morning, afternoon, evening)
-     *
-     * List of day time period delimited by ';' (acceptable values are M, A, E)
-     *
-     * @var string
-     */
-    protected $inbounddeparttime;
+/**
+ * Filter for start of range for inbound departure time
+ *
+ * Formatted as 'hh:mm'
+ *
+ * @var string
+ */
+protected $inbounddepartstarttime;
 
-    /**
-     * Filter flights by the specified carriers
-     *
-     * Must be semicolon-separated Iata carrier codes.
-     *
-     * @link http://www.iata.org/publications/Pages/code-search.aspx
-     *
-     * @var string
-     */
-    protected $includecarriers;
+/**
+ * Filter for inbound departure time by time period of the day (i.e. morning, afternoon, evening)
+ *
+ * List of day time period delimited by ';' (acceptable values are M, A, E)
+ *
+ * @var string
+ */
+protected $inbounddeparttime;
 
-    /**
-     * The number of infants
-     *
-     * @var int
-     */
-    protected $infants = 0;
+/**
+ * Filter flights by the specified carriers
+ *
+ * Must be semicolon-separated Iata carrier codes.
+ *
+ * @link http://www.iata.org/publications/Pages/code-search.aspx
+ *
+ * @var string
+ */
+protected $includecarriers;
 
-    /**
-     ** The code schema used for locations
-     *
-     * Supported values are: Iata, GeoNameCode, GeoNameId, Rnid, Sky
-     *
-     * @var string
-     */
-    protected $locationschema = 'Iata';
+/**
+ * The number of infants
+ *
+ * @var int
+ */
+protected $infants = 0;
 
-    /**
-     * Origin airports to filter on
-     *
-     * List of airport codes delimited by ';'
-     *
-     * @var string
-     */
-    protected $originairports;
+/**
+ ** The code schema used for locations
+ *
+ * Supported values are: Iata, GeoNameCode, GeoNameId, Rnid, Sky
+ *
+ * @var string
+ */
+protected $locationschema = 'Iata';
 
-    /**
-     * The origin city or airport
-     *
-     * Specified location schema, or Skyscanner Rnid
-     *
-     * @var string
-     */
-    protected $originplace = 'LHR';
+/**
+ * Origin airports to filter on
+ *
+ * List of airport codes delimited by ';'
+ *
+ * @var string
+ */
+protected $originairports;
 
-    /**
-     * The departure date
-     *
-     * Formatted as YYYY-mm-dd
-     *
-     * @var string
-     */
-    protected $outbounddate;
+/**
+ * The origin city or airport
+ *
+ * Specified location schema, or Skyscanner Rnid
+ *
+ * @var string
+ */
+protected $originplace = 'LHR';
 
-    /**
-     * Filter for end of range for outbound departure time
-     *
-     * Formatted as 'hh:mm'
-     *
-     * @var string
-     */
-    protected $outbounddepartendtime;
+/**
+ * The departure date
+ *
+ * Formatted as YYYY-mm-dd
+ *
+ * @var string
+ */
+protected $outbounddate;
 
-    /**
-     * Filter for start of range for outbound departure time
-     *
-     * Formatted as 'hh:mm'
-     *
-     * @var string
-     */
-    protected $outbounddepartstarttime;
+/**
+ * Filter for end of range for outbound departure time
+ *
+ * Formatted as 'hh:mm'
+ *
+ * @var string
+ */
+protected $outbounddepartendtime;
 
-    /**
-     * Filter for outbound departure time by time period of the day (i.e. morning, afternoon, evening)
-     *
-     * List of day time period delimited by ';' (acceptable values are M, A, E)
-     *
-     * @var string
-     */
-    protected $outbounddeparttime;
+/**
+ * Filter for start of range for outbound departure time
+ *
+ * Formatted as 'hh:mm'
+ *
+ * @var string
+ */
+protected $outbounddepartstarttime;
 
-    /**
-     * Image save path for agents and carriers, optional
-     *
-     * @var string
-     */
-    protected $savePath = '/tmp/images/';
+/**
+ * Filter for outbound departure time by time period of the day (i.e. morning, afternoon, evening)
+ *
+ * List of day time period delimited by ';' (acceptable values are M, A, E)
+ *
+ * @var string
+ */
+protected $outbounddeparttime;
 
-    /**
-     * Filter for maximum number of stops
-     *
-     * Supported values are: 0, 1, 2, 3
-     *
-     * @var string
-     */
-    protected $stops = 0;
+/**
+ * Image save path for agents and carriers, optional
+ *
+ * @var string
+ */
+protected $savePath = '/tmp/images/';
 
-    /**
-     * The property to sort on. If specified, you must also specify sortorder
-     *
-     * Supported values are: carrier, duration, outboundarrivetime, outbounddeparttime, inboundarrivetime,
-     *                       inbounddeparttime, price
-     *
-     * @var string
-     */
-    protected $sorttype = 'price';
+/**
+ * Filter for maximum number of stops
+ *
+ * Supported values are: 0, 1, 2, 3
+ *
+ * @var string
+ */
+protected $stops = 0;
 
-    /**
-     * Sort direction
-     *
-     * Supported values are: asc, desc
-     *
-     * @var string
-     */
-    protected $sortorder = 'asc';
+/**
+ * The property to sort on. If specified, you must also specify sortorder
+ *
+ * Supported values are: carrier, duration, outboundarrivetime, outbounddeparttime, inboundarrivetime,
+ *                       inbounddeparttime, price
+ *
+ * @var string
+ */
+protected $sorttype = 'price';
+
+/**
+ * Sort direction
+ *
+ * Supported values are: asc, desc
+ *
+ * @var string
+ */
+protected $sortorder = 'asc';
 ```
 
 ## Change log
