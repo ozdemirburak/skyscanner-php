@@ -34,12 +34,106 @@ $pricing->setParameters([
     'outbounddate' => Carbon::now()->addWeek(1)->format('Y-m-d'),
     'stops' => 0
 ]);
-$flights = $pricing->parseFlights();
+$flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
 ```
 
-All the variable names are the same as indicated within the SkyScanner API documentation. 
+After calling the `parseFlights()` method, some part of the data that is returned will look like below where it will
+only return the agent with the lowest price.
 
-The initial parameters are the ones needed in the all API calls.
+```
+0 => array:2 [
+  "outbound_leg" => array:8 [
+    "id" => "13554-1607191020-BA-0-12585-1607191620"
+    "origin" => 13554
+    "destination" => 12585
+    "departs_at" => "2016-07-19T10:20:00"
+    "arrives_at" => "2016-07-19T16:20:00"
+    "duration" => 240
+    "direction" => "Outbound"
+    "flight_numbers" => array:1 [
+      676 => array:1 [
+        "carrier" => array:5 [
+          "id" => 881
+          "code" => "BA"
+          "name" => "British Airways"
+          "display_code" => "BA"
+          "image_path" => "http://s1.apideeplink.com/images/airlines/BA.png"
+        ]
+      ]
+    ]
+  ]
+  "agent" => array:9 [
+    "price" => 245.45
+    "url" => "http://partners.api.skyscanner.net/apiservices/deeplink/v2?_cje=jzj5DawL5zJyT%2bnfeP9GJWfImnVvZd7vh0AJSObmdOp8YP07VbGmhzc%2bVTc80nUp&url=http%3a%2f%2fwww.apideeplink.com%2ftransport_deeplink%2f4.0%2fUK%2fen-gb%2fGBP%2fomeg%2f1%2f13554.12585.2016-07-19%2fair%2ftrava%2fflights%3fitinerary%3dflight%7c-32480%7c676%7c13554%7c2016-07-19T10%3a20%7c12585%7c2016-07-19T16%3a20%26carriers%3d-32480%26passengers%3d1%2c0%2c0%26channel%3ddataapi%26cabin_class%3deconomy%26facilitated%3dfalse%26ticket_price%3d245.45%26is_npt%3dfalse%26is_multipart%3dfalse%26client_id%3dskyscanner_b2b%26request_id%3d2ed24021-23ba-4f55-9a1e-2b491e346cf2%26deeplink_ids%3deu-central-1.prod_2189ee66fcc0ebd8f20f8fdc4d05ebea%26commercial_filters%3dfalse%26q_datetime_utc%3d2016-07-12T13%3a14%3a01"
+    "age" => 314
+    "id" => 3496199
+    "name" => "omegaflightstore.com"
+    "status" => "UpdatesPending"
+    "optimised_for_mobile" => false
+    "type" => "TravelAgent"
+    "image_path" => "http://s1.apideeplink.com/images/websites/omeg.png"
+  ]
+]
+```
+
+If you pass the `$onlyCheapestAgentPerItinerary` as `false` to the flight parser as 
+`parseFlights($onlyCheapestAgentPerItinerary = false)`, then it will return all the agents with all the properties
+that the `agent` property has. 
+
+Furthermore, if you also indicate the `inbounddate` variable, then it will also return the `inbound_leg` just as the
+same as the outbound leg.
+
+```
+0 => array:3 [
+  "agents" => array:20 [
+    0 => array:9 [ …9]
+    1 => array:9 [ …9]
+    2 => array:9 [ …9]
+    3 => array:9 [ …9]
+    4 => array:9 [ …9]
+    5 => array:9 [ …9]
+    6 => array:9 [ …9]
+    7 => array:9 [ …9]
+    8 => array:9 [ …9]
+    9 => array:9 [ …9]
+    10 => array:9 [ …9]
+    11 => array:9 [ …9]
+    12 => array:9 [ …9]
+    13 => array:9 [ …9]
+    14 => array:9 [ …9]
+    15 => array:9 [ …9]
+    16 => array:9 [ …9]
+    17 => array:9 [ …9]
+    18 => array:9 [ …9]
+    19 => array:9 [ …9]
+  ]
+  "outbound_leg" => array:8 [
+    "id" => "13554-1607191745-BA-0-12585-1607192340"
+    "origin" => 13554
+    "destination" => 12585
+    "departs_at" => "2016-07-19T17:45:00"
+    "arrives_at" => "2016-07-19T23:40:00"
+    "duration" => 235
+    "direction" => "Outbound"
+    "flight_numbers" => array:1 [ …1]
+  ]
+  "inbound_leg" => array:8 [
+    "id" => "12585-1607261350-BA-0-13554-1607261615"
+    "origin" => 12585
+    "destination" => 13554
+    "departs_at" => "2016-07-26T13:50:00"
+    "arrives_at" => "2016-07-26T16:15:00"
+    "duration" => 265
+    "direction" => "Inbound"
+    "flight_numbers" => array:1 [ …1]
+  ]
+]
+```
+
+All the variable names are the same as indicated within the [SkyScanner API documentation]
+(http://business.skyscanner.net/portal/en-GB/Documentation/FlightsLivePricingList). 
+
+The initial parameters are the ones that are needed in the all API calls.
 
 ``` php
 /**
