@@ -132,8 +132,8 @@ same as the outbound leg.
 ]
 ```
 
-All the variable names are the same as indicated within the [SkyScanner API documentation]
-(http://business.skyscanner.net/portal/en-GB/Documentation/FlightsLivePricingList). 
+All the variable names are the same as indicated within the 
+[SkyScanner API documentation](http://business.skyscanner.net/portal/en-GB/Documentation/FlightsLivePricingList). 
 
 The initial parameters are the ones that are needed in the all API calls.
 
@@ -373,6 +373,20 @@ protected $outbounddepartstarttime;
 protected $outbounddeparttime;
 
 /**
+ * Save remote agent images to local where urls are returned from the request
+ *
+ * @var bool
+ */
+protected $saveAgentImages = false;
+
+/**
+ * Save remote carrier images to local where urls are returned from the request
+ *
+ * @var bool
+ */
+protected $saveCarrierImages = false;
+    
+/**
  * Image save path for agents and carriers, optional
  *
  * @var string
@@ -415,6 +429,17 @@ pass the key value pairs to `setParameters` method like below.
 $pricing->setParameters([
     'sorttype' => 'outboundarrivetime',
     'sortorder' => 'desc'
+]);
+```
+
+Finally, to save the remote carrier and agent images to a such local folder where the
+image urls are provided by the API call, set the image parameters like below.
+
+``` php
+$pricing->setParameters([
+    'saveAgentImages' => true,
+    'saveCarrierImages' => true,
+    'savePath' => '/tmp/images/'
 ]);
 ```
 

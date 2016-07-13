@@ -249,6 +249,20 @@ class LivePricing extends BaseRequest
     protected $outbounddeparttime;
 
     /**
+     * Save remote agent images to local where urls are returned from the request
+     *
+     * @var bool
+     */
+    protected $saveAgentImages = false;
+
+    /**
+     * Save remote carrier images to local where urls are returned from the request
+     *
+     * @var bool
+     */
+    protected $saveCarrierImages = false;
+
+    /**
      * Image save path for agents and carriers, optional
      *
      * @var string
@@ -340,8 +354,8 @@ class LivePricing extends BaseRequest
                 }
             }
             $this->beautifyFlights(
-                $this->getCarriersOrAgents($data->Agents, $this->agentVariables),
-                $this->getCarriersOrAgents($data->Carriers, $this->carrierVariables),
+                $this->getCarriersOrAgents($data->Agents, $this->agentVariables, $this->saveAgentImages),
+                $this->getCarriersOrAgents($data->Carriers, $this->carrierVariables, $this->saveCarrierImages),
                 $this->getLegs($data)
             );
             $this->cleanVariables();
