@@ -344,8 +344,8 @@ class LivePricing extends BaseRequest
                 $this->getCarriersOrAgents($data->Carriers, $this->carrierVariables),
                 $this->getLegs($data)
             );
+            $this->cleanVariables();
         }
-        $this->cleanVariables();
         return $this->flights;
     }
 

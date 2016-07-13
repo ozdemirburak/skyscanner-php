@@ -29,7 +29,6 @@ where it will also exclude the flights which are not direct with the prices for 
 use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 
 $pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
-
 $pricing->setParameters([
     'adults' => 1,
     'destinationplace' => 'IST',
@@ -37,7 +36,6 @@ $pricing->setParameters([
     'outbounddate' => Carbon::now()->addWeek(1)->format('Y-m-d'),
     'stops' => 0
 ]);
-
 $flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
 ```
 
@@ -141,6 +139,15 @@ The initial parameters are the ones that are needed in the all API calls.
 
 ``` php
 /**
+ * The API Key to identify the customer
+ *
+ * @link http://portal.business.skyscanner.net/en-gb/accounts/profile/
+ *
+ * @var string
+ */
+protected $apiKey = '';
+    
+/**
  * ISO country code, or specified location schema
  *
  * @link https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes
@@ -171,7 +178,6 @@ protected $locale = 'en-GB';
 The parameters specified below are specific to Live Pricing Service.
 
 ``` php
-
 /**
  * The number of adult passengers
  *
@@ -400,6 +406,16 @@ protected $sorttype = 'price';
  * @var string
  */
 protected $sortorder = 'asc';
+```
+
+As showed in the beginning of the usage, to set the parameters, just 
+pass the key value pairs to `setParameters` method like below.
+
+``` php
+$pricing->setParameters([
+    'sorttype' => 'outboundarrivetime',
+    'sortorder' => 'desc'
+]);
 ```
 
 ## Change log
