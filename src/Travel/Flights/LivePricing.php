@@ -388,7 +388,8 @@ class LivePricing extends BaseRequest
                 $legs[$legKey][$key] = $leg->$variable;
             }
             foreach ($leg->FlightNumbers as $singleLegKey => $singleLeg) {
-                $legs[$legKey]['flight_numbers'][$singleLeg->FlightNumber]['carrier_id'] = $singleLeg->CarrierId;
+                $legs[$legKey]['flight_numbers'][$singleLegKey]['flight_number'] = $singleLeg->FlightNumber;
+                $legs[$legKey]['flight_numbers'][$singleLegKey]['carrier_id'] = $singleLeg->CarrierId;
             }
         }
         return $legs;
@@ -435,9 +436,12 @@ class LivePricing extends BaseRequest
             foreach (['outbound_leg' => 'outbound_leg_id', 'inbound_leg' => 'inbound_leg_id'] as $key => $search) {
                 if (isset($this->flights[$flightKey][$search])) {
                     $legId = array_search($this->flights[$flightKey][$search], array_column($legs, 'id'));
-                    foreach ($legs[$legId]['flight_numbers'] as $flight_number => $leg_information) {
+                    foreach ($legs[$legId]['flight_numbers'] as $order => $leg_information) {
                         $carrierId = array_search($leg_information['carrier_id'], array_column($carriers, 'id'));
-                        $legs[$legId]['flight_numbers'][$flight_number]['carrier'] = $carriers[$carrierId];
+                        $flightCode = $carriers[$carrierId]['code'] .
+                                      $legs[$legId]['flight_numbers'][$order]['flight_number'];
+                        $legs[$legId]['flight_numbers'][$order]['flight_code'] = $flightCode;
+                        $legs[$legId]['flight_numbers'][$order]['carrier'] = $carriers[$carrierId];
                     }
                     $this->flights[$flightKey][$key] = $legs[$legId];
                 }
