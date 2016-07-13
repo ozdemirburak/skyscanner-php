@@ -53,7 +53,9 @@ only return the agent with the lowest price.
     "duration" => 240
     "direction" => "Outbound"
     "flight_numbers" => array:1 [
-      676 => array:1 [
+      0 => array:1 [
+        "flight_number" => "676"
+        "flight_code" => "BA676"
         "carrier" => array:5 [
           "id" => 881
           "code" => "BA"
