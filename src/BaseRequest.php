@@ -224,7 +224,8 @@ abstract class BaseRequest
     public function getResponseHeader($key, $first = true)
     {
         $header = $this->response->getHeader($key);
-        return $first ? $header[0] : $header;
+        $headerFirst = isset($header[0]) ? $header[0] : "";
+        return $first ? $headerFirst : $header;
     }
 
     /**

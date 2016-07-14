@@ -312,15 +312,28 @@ class LivePricing extends BaseRequest
     protected $url = 'http://partners.api.skyscanner.net/apiservices/pricing/v1.0/';
 
     /**
-     * @param bool $resetSession
+     * If you make too many requests, then you will probably have issues on rate limiting.
+     * So, if the rate limit is exceeded, wait for 15 seconds, then continue processing
+     *
+     * Message: "Rate limit has been exceeded: 100 PerMinute for PricingSession
+     *
+     * @param bool   $resetSession
+     * @param string $location
      *
      * @return string
      */
-    public function getUrl($resetSession = false)
+    public function getUrl($resetSession = false, $location = "")
     {
         if (empty($this->session) || $resetSession === true) {
-            $this->makeRequest('POST');
-            $locationParameters = explode('/', $this->getLocation());
+            while (empty($location)) {
+                $this->makeRequest('POST');
+                $location = $this->getLocation();
+                // Instead of spamming requests, just sleep
+                if (empty($location)) {
+                    sleep(15);
+                }
+            }
+            $locationParameters = explode('/', $location);
             $this->session = end($locationParameters);
             $this->url .= $this->session . '?apiKey=' . $this->getParameter('apiKey') . '&' .
                           http_build_query($this->getOptionalPollingParameters());
