@@ -13,7 +13,7 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidRemoteImageNotSaved()
     {
-        $this->saveImage("http://www.dummy.com/dummy.jpg", "/tmp/images/");
+        $this->saveImage("http://www.qwertyasdfgzxcv.com/dummy.jpg", "/tmp/images/");
         $this->assertFileNotExists("/tmp/images/dummy.jpg");
     }
 
@@ -22,7 +22,7 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testImagePathIsReturnedFromInvalidRemoteImage()
     {
-        $image = $this->saveImage("http://www.dummy.com/dummy.jpg", "/tmp/images/");
+        $image = $this->saveImage("http://www.qwertyasdfgzxcv.com/dummy.jpg", "/tmp/images/");
         $this->assertEmpty($image);
     }
 
