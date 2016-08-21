@@ -2,6 +2,7 @@
 
 namespace OzdemirBurak\SkyScanner;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
@@ -91,6 +92,8 @@ abstract class BaseRequest
 
     /**
      * @param $parameters
+     *
+     * @throws \Exception
      */
     public function setParameters($parameters)
     {
@@ -103,7 +106,7 @@ abstract class BaseRequest
                 }
             }
         } else {
-            $this->printErrorMessage('Parameters that are passed must be an array with keys and values.');
+            throw new Exception('Parameters that are passed must be an array with keys and values.');
         }
     }
 
@@ -186,21 +189,23 @@ abstract class BaseRequest
     /**
      * Get Response Status
      *
-     * 200 => Success
-     * 201 => Created – The session has been created.
-     * 204 => No Content – The session is still being created (wait and try again).
-     * 304 => Not Modified – The results have not been modified since the last poll.
-     * 400 => Bad Request – Input validation failed.
-     * 403 => Forbidden – The API Key was not supplied, or it was invalid, or it is not authorized to access.
-     * 410 => Gone – The session has expired. A new session must be created.
-     * 429 => Too Many Requests – There have been too many requests in the last minute.
-     * 500 => Server Error – An internal server error has occurred which has been logged.
-     *
      * @return integer
      */
     public function getResponseStatus()
     {
         return $this->response->getStatusCode();
+    }
+
+    /**
+     * @param bool $withStatusCode
+     *
+     * @return mixed|string
+     */
+    public function getResponseMessage($withStatusCode = true)
+    {
+        $message = array_key_exists($status = $this->getResponseStatus(), $messages = $this->getResponseMessages()) ?
+                   $messages[$status] : 'Unknown response';
+        return $withStatusCode ? join(' - ', [$status, $message]) : $message;
     }
 
     /**
@@ -236,6 +241,24 @@ abstract class BaseRequest
     public function getClient()
     {
         return empty($this->client) ? new Client() : $this->client;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getResponseMessages()
+    {
+        return [
+            200 => 'Success',
+            201 => 'Created – The session has been created.',
+            204 => 'No Content – The session is still being created (wait and try again).',
+            304 => 'Not Modified – The results have not been modified since the last poll.',
+            400 => 'Bad Request – Input validation failed.',
+            403 => 'Forbidden – The API Key was not supplied, or it was invalid, or it is not authorized to access.',
+            410 => 'Gone – The session has expired. A new session must be created.',
+            429 => 'Too Many Requests – There have been too many requests in the last minute.',
+            500 => 'Server Error – An internal server error has occurred which has been logged.'
+        ];
     }
 
     /**

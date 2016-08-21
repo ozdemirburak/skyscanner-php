@@ -372,6 +372,8 @@ class LivePricing extends BaseRequest
                 $this->getLegs($data)
             );
             $this->cleanVariables();
+        } else {
+            $this->printErrorMessage($this->getResponseMessage());
         }
         return $this->flights;
     }
