@@ -56,6 +56,8 @@ class BrowseCache extends BaseRequest
     ];
 
     /**
+     * Needed for X-Forwarded-For
+     *
      * @var string
      */
     protected $ip;
