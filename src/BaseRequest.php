@@ -140,11 +140,20 @@ abstract class BaseRequest
      */
     protected function getRequestParameters($isGet = true)
     {
-        $method = $isGet === true ? 'query' : 'form_params';
         return [
-            $method => $this->getParameters($isGet),
+            $this->getMethod($isGet) => $this->getParameters($isGet),
             'Accept' => 'application/json'
         ];
+    }
+
+    /**
+     * @param bool $isGet
+     *
+     * @return string
+     */
+    protected function getMethod($isGet = true)
+    {
+        return $isGet === true ? 'query' : 'form_params';
     }
 
     /**

@@ -132,7 +132,8 @@ class BrowseCache extends BaseRequest
                 $this->addQuotes($data->Quotes);
             }
             if ($method !== 'browsequotes') {
-                $classMethod = 'add' . ucwords(end(explode('browse', $method)));
+                $array = explode('browse', $method);
+                $classMethod = 'add' . ucwords(end($array));
                 $this->$classMethod($data);
             }
             $this->data['referral_url'] = $this->getReferralUrl($method);
@@ -340,12 +341,14 @@ class BrowseCache extends BaseRequest
     }
 
     /**
+     * @param bool $isGet
+     *
      * @return array
      */
-    protected function getRequestParameters()
+    protected function getRequestParameters($isGet = true)
     {
         return [
-            'query' => ['apiKey' => $this->apiKey],
+            $this->getMethod($isGet) => ['apiKey' => $this->apiKey],
             'Accept' => 'application/json',
             'X-Forwarded-For' => $this->getXForwardedFor()
         ];
