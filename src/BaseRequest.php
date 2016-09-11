@@ -121,9 +121,8 @@ abstract class BaseRequest
     {
         try {
             $isGet = strtolower($method) === 'get' ? true : false;
-            $parameters = !empty($parameters) ? $parameters : $this->getRequestsParameters($isGet);
-            $this->response = $this->client->request($method, !empty($url) ? $url : $this->url, $parameters);
-            return $this->response;
+            $parameters = !empty($parameters) ? $parameters : $this->getRequestParameters($isGet);
+            return $this->response = $this->client->request($method, !empty($url) ? $url : $this->url, $parameters);
         } catch (RequestException $e) {
             $this->printErrorMessage(Psr7\str($e->getRequest()));
             if ($e->hasResponse()) {
@@ -139,7 +138,7 @@ abstract class BaseRequest
      *
      * @return array
      */
-    protected function getRequestsParameters($isGet = true)
+    protected function getRequestParameters($isGet = true)
     {
         $method = $isGet === true ? 'query' : 'form_params';
         return [
@@ -219,6 +218,33 @@ abstract class BaseRequest
     }
 
     /**
+     * @param bool $decode
+     *
+     * @return mixed
+     */
+    public function getResponseBody($decode = true)
+    {
+        $data = $this->response->getBody();
+        return $decode === true ? json_decode($data) : $data;
+    }
+
+    /**
+     * Helper method for array search to locate the property with the given property
+     *
+     * @param $needle
+     * @param $haystack
+     * @param $property
+     *
+     * @return mixed
+     */
+    protected function arraySearch($needle, $haystack, $property)
+    {
+        return array_search($needle, array_map(function ($value) use ($property) {
+            return is_object($value) ? $value->$property : $value[$property];
+        }, $haystack));
+    }
+
+    /**
      * Returns specific response header defined by key
      *
      * @param string $key
@@ -229,7 +255,7 @@ abstract class BaseRequest
     public function getResponseHeader($key, $first = true)
     {
         $header = $this->response->getHeader($key);
-        $headerFirst = isset($header[0]) ? $header[0] : "";
+        $headerFirst = isset($header[0]) ? $header[0] : '';
         return $first ? $headerFirst : $header;
     }
 
