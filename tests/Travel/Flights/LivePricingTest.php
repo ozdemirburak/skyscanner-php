@@ -7,8 +7,6 @@ use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 
 class LivePricingTest extends \PHPUnit_Framework_TestCase
 {
-    protected $apiKey = 'prtl6749387986743898559646983194';
-
     /**
      * @group live-pricing-methods
      */
@@ -61,7 +59,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithApiKey()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->makeRequest('POST');
         $this->assertEquals(201, $pricing->getResponseStatus());
     }
@@ -71,7 +69,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testUrl()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $this->assertNotEmpty($pricing->getUrl());
     }
 
@@ -80,7 +78,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testResponseContentType()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->makeRequest('POST');
         $this->assertEquals('application/json', $pricing->getResponseHeader('Content-Type'));
     }
@@ -90,7 +88,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithNonStop()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $this->assertNotEmpty($pricing->parseFlights());
     }
 
@@ -99,7 +97,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithMultipleStops()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->setParameters(['stops' => 2]);
         $this->assertNotEmpty($pricing->parseFlights());
     }
@@ -109,7 +107,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithNonStop()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights());
     }
@@ -119,7 +117,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithMultipleStops()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->setParameters(['stops' => 2, 'inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights());
     }
@@ -129,7 +127,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testOneWayWithMultipleStopsWithoutCheapestFlights()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->setParameters(['stops' => 2]);
         $this->assertNotEmpty($pricing->parseFlights(false));
     }
@@ -139,7 +137,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoundWithNonStopWithoutCheapestFlights()
     {
-        $pricing = new LivePricing($this->apiKey);
+        $pricing = new LivePricing(API_KEY);
         $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
         $this->assertNotEmpty($pricing->parseFlights(false));
     }

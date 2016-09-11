@@ -16,26 +16,26 @@ trait ImageTrait
      */
     public function saveImage($imagePath, $saveDirPath)
     {
-        $image = str_replace(" ", "%20", $imagePath);
-        if (strpos($image, "/") !== false) {
-            $split = explode("/", $image);
-            $fileName = str_replace("%20", "-", end($split));
+        $image = str_replace(' ', '%20', $imagePath);
+        if (strpos($image, '/') !== false) {
+            $split = explode('/', $image);
+            $fileName = str_replace('%20', '-', end($split));
             if (!empty($fileName)) {
-                $savePath = preg_replace('~/+~', '/', join("/", [$saveDirPath, $fileName]));
+                $savePath = preg_replace('~/+~', '/', join('/', [$saveDirPath, $fileName]));
                 if (!file_exists($savePath)) {
                     try {
                         $this->makeDirRecursive($saveDirPath);
                         copy($image, $savePath);
                         return $savePath;
                     } catch (\Exception $e) {
-                        $this->printErrorMessage("Failed to download image, located at " . $imagePath);
+                        $this->printErrorMessage('Failed to download image, located at ' . $imagePath);
                     }
                 } else {
                     return $savePath;
                 }
             }
         }
-        return "";
+        return '';
     }
 
     /**

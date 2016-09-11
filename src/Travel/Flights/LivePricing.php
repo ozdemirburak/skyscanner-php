@@ -315,23 +315,19 @@ class LivePricing extends BaseRequest
      * If you make too many requests, then you will probably have issues on rate limiting.
      * So, if the rate limit is exceeded, wait for 15 seconds, then continue processing
      *
-     * Message: "Rate limit has been exceeded: 100 PerMinute for PricingSession
+     * Message: Rate limit has been exceeded: 100 PerMinute for PricingSession
      *
      * @param bool   $resetSession
      * @param string $location
      *
      * @return string
      */
-    public function getUrl($resetSession = false, $location = "")
+    public function getUrl($resetSession = false, $location = '')
     {
         if (empty($this->session) || $resetSession === true) {
             while (empty($location)) {
                 $this->makeRequest('POST');
                 $location = $this->getLocation();
-                // Instead of spamming requests, just sleep
-                if (empty($location)) {
-                    sleep(15);
-                }
             }
             $locationParameters = explode('/', $location);
             $this->session = end($locationParameters);
@@ -351,7 +347,7 @@ class LivePricing extends BaseRequest
     {
         $this->makeRequest('GET', $this->getUrl());
         if ($this->getResponseStatus() === 200) {
-            $data = json_decode($this->response->getBody());
+            $data = $this->getResponseBody();
             foreach ($data->Itineraries as $key => $itinerary) {
                 foreach (['outbound_leg_id' => 'OutboundLegId', 'inbound_leg_id' => 'InboundLegId'] as $new => $old) {
                     if (isset($itinerary->$old)) {
@@ -442,7 +438,7 @@ class LivePricing extends BaseRequest
     {
         foreach ($this->flights as $flightKey => $flight) {
             foreach ($flight['agents'] as $key => $agent) {
-                $agent = $agents[array_search($agent['detail'][0], array_column($agents, 'id'))];
+                $agent = $agents[$this->arraySearch($agent['detail'][0], $agents, 'id')];
                 foreach (array_keys($this->agentVariables) as $agentKey) {
                     $this->flights[$flightKey]['agents'][$key][$agentKey] = $agent[$agentKey];
                 }
@@ -450,9 +446,9 @@ class LivePricing extends BaseRequest
             }
             foreach (['outbound_leg' => 'outbound_leg_id', 'inbound_leg' => 'inbound_leg_id'] as $key => $search) {
                 if (isset($this->flights[$flightKey][$search])) {
-                    $legId = array_search($this->flights[$flightKey][$search], array_column($legs, 'id'));
+                    $legId = $this->arraySearch($this->flights[$flightKey][$search], $legs, 'id');
                     foreach ($legs[$legId]['flight_numbers'] as $order => $leg_information) {
-                        $carrierId = array_search($leg_information['carrier_id'], array_column($carriers, 'id'));
+                        $carrierId = $this->arraySearch($leg_information['carrier_id'], $carriers, 'id');
                         $flightCode = $carriers[$carrierId]['code'] .
                                       $legs[$legId]['flight_numbers'][$order]['flight_number'];
                         $legs[$legId]['flight_numbers'][$order]['flight_code'] = $flightCode;
