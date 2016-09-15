@@ -313,7 +313,8 @@ class LivePricing extends BaseRequest
 
     /**
      * If you make too many requests, then you will probably have issues on rate limiting.
-     * So, if the rate limit is exceeded, wait for 15 seconds, then continue processing
+     * So, until a non-empty location is received, it will make a request.
+     * In other words, until the rate limit is reset, it will make a request.
      *
      * Message: Rate limit has been exceeded: 100 PerMinute for PricingSession
      *
