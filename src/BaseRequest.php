@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner;
 
-use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
@@ -92,21 +91,15 @@ abstract class BaseRequest
 
     /**
      * @param $parameters
-     *
-     * @throws \Exception
      */
-    public function setParameters($parameters)
+    public function setParameters(array $parameters)
     {
-        if (is_array($parameters)) {
-            foreach ($parameters as $property => $value) {
-                if (property_exists($this, $property)) {
-                    $this->$property = $value;
-                } else {
-                    $this->printErrorMessage('Invalid property name: ' . $property);
-                }
+        foreach ($parameters as $property => $value) {
+            if (property_exists($this, $property)) {
+                $this->$property = $value;
+            } else {
+                $this->printErrorMessage('Invalid property name: ' . $property);
             }
-        } else {
-            throw new Exception('Parameters that are passed must be an array with keys and values.');
         }
     }
 
@@ -117,7 +110,7 @@ abstract class BaseRequest
      *
      * @return bool|mixed|\Psr\Http\Message\ResponseInterface
      */
-    public function makeRequest($method = 'GET', $url = '', $parameters = [])
+    public function makeRequest($method = 'GET', $url = '', array $parameters = [])
     {
         try {
             $isGet = strtolower($method) === 'get' ? true : false;
@@ -157,6 +150,8 @@ abstract class BaseRequest
     }
 
     /**
+     * The parameters used for the requests to the Skyscanner API
+     *
      * @param bool $isGet
      *
      * @return array
@@ -227,6 +222,8 @@ abstract class BaseRequest
     }
 
     /**
+     * Response body, in JSON format if the Accept header is set as 'application/json'
+     *
      * @param bool $decode
      *
      * @return mixed
@@ -279,6 +276,8 @@ abstract class BaseRequest
     }
 
     /**
+     * Messages returned by the Skyscanner API
+     *
      * @return array
      */
     protected function getResponseMessages()
