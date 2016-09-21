@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Tests\Traits;
 
-use Carbon\Carbon;
 use OzdemirBurak\SkyScanner\Traits\ReferralTrait;
 
 class ReferralTraitTest extends \PHPUnit_Framework_TestCase
@@ -14,7 +13,7 @@ class ReferralTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testReferralLinkByParameters()
     {
-        $outboundDate = Carbon::now()->addMonth(1)->format('Y-m-d');
+        $outboundDate = date('Y-m-d', strtotime('+1 month'));
         $url = $this->getReferralLinkByParameters('TR', 'TRY', 'tr-TR', 'SAW', 'DLM', $outboundDate, null, API_KEY);
         $this->assertEquals('http://partners.api.skyscanner.net/apiservices/referral/v1.0/TR/TRY/tr-TR/SAW/DLM/' .
             $outboundDate . '?apiKey=' . substr(API_KEY, 0, 16), $url);
@@ -33,8 +32,8 @@ class ReferralTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testReferralLinkByArrayOfParameters()
     {
-        $outboundDate = Carbon::now()->addMonth(1)->format('Y-m-d');
-        $inboundDate = Carbon::now()->addMonth(2)->format('Y-m-d');
+        $outboundDate = date('Y-m-d', strtotime('+1 month'));
+        $inboundDate = date('Y-m-d', strtotime('+2 month'));
         $url = $this->getReferralLinkByArrayOfParameters(['TR', 'TRY', 'tr-TR', 'SAW', 'DLM', $outboundDate, $inboundDate], API_KEY);
         $this->assertEquals('http://partners.api.skyscanner.net/apiservices/referral/v1.0/TR/TRY/tr-TR/SAW/DLM/' .
             $outboundDate . '/' . $inboundDate . '?apiKey=' . substr(API_KEY, 0, 16), $url);

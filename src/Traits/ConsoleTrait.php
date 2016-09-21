@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Traits;
 
-use Carbon\Carbon;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 
@@ -42,7 +41,7 @@ trait ConsoleTrait
             $output->writeln(
                 "<$type>" .
                 $string . " => " .
-                Carbon::now()->toDateTimeString() .
+                date("Y-m-d H:i:s") .
                 "</$type>"
             );
         }

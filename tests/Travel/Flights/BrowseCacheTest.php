@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Tests\Travel\Flights;
 
-use Carbon\Carbon;
 use Exception;
 use OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache;
 
@@ -13,7 +12,7 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testUrl()
     {
-        $date = Carbon::now()->addWeek(1)->format('Y-m-d');
+        $date = date('Y-m-d', strtotime('+1 week'));
         $parameters = ['originPlace' => 'LHR', 'destinationPlace' => 'JFK', 'outboundPartialDate' => $date];
         $url = 'http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/JFK/' . $date . '/';
         $cache = new BrowseCache(API_KEY);
@@ -71,7 +70,7 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     public function testQuotesOneWay()
     {
         $cache = new BrowseCache(API_KEY);
-        $cache->setParameters(['outboundPartialDate' => Carbon::now()->addMonth(1)->format('Y-m')]);
+        $cache->setParameters(['outboundPartialDate' => date('Y-m', strtotime('+1 month'))]);
         $this->assertNotEmpty($cache->getData('browsequotes')['quotes']);
     }
 
@@ -82,8 +81,8 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = new BrowseCache(API_KEY);
         $cache->setParameters([
-            'outboundPartialDate'  => Carbon::now()->addMonth(1)->format('Y-m-d'),
-            'inboundPartialDate'   => Carbon::now()->addMonth(1)->format('Y-m-d')
+            'outboundPartialDate'  => date('Y-m-d', strtotime('+1 month')),
+            'inboundPartialDate'   => date('Y-m-d', strtotime('+1 month'))
         ]);
         $this->assertNotEmpty($cache->getData('browsequotes')['quotes']);
     }
@@ -124,7 +123,7 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = new BrowseCache(API_KEY);
         $cache->setParameters([
-            'outboundPartialDate' => Carbon::now()->addMonth(1)->format('Y-m')
+            'outboundPartialDate' => date('Y-m', strtotime('+1 month'))
         ]);
         $this->assertNotEmpty($cache->getData('browsedates')['dates']);
     }
@@ -136,8 +135,8 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = new BrowseCache(API_KEY);
         $cache->setParameters([
-            'outboundPartialDate'  => Carbon::now()->addMonth(1)->format('Y-m'),
-            'inboundPartialDate'   => Carbon::now()->addMonth(2)->format('Y-m')
+            'outboundPartialDate'  => date('Y-m', strtotime('+1 month')),
+            'inboundPartialDate'   => date('Y-m', strtotime('+2 month'))
         ]);
         $this->assertNotEmpty($cache->getData('browsedates')['dates']);
     }
@@ -149,7 +148,7 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = new BrowseCache(API_KEY);
         $cache->setParameters([
-            'outboundPartialDate' => Carbon::now()->addMonth(1)->format('Y-m')
+            'outboundPartialDate' => date('Y-m', strtotime('+1 month'))
         ]);
         $this->assertNotEmpty($cache->getData('browsegrid')['grid']);
     }
@@ -161,8 +160,8 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = new BrowseCache(API_KEY);
         $cache->setParameters([
-            'outboundPartialDate'  => Carbon::now()->addMonth(1)->format('Y-m'),
-            'inboundPartialDate'   => Carbon::now()->addMonth(2)->format('Y-m')
+            'outboundPartialDate'  => date('Y-m', strtotime('+1 month')),
+            'inboundPartialDate'   => date('Y-m', strtotime('+2 month'))
         ]);
         $this->assertNotEmpty($cache->getData('browsegrid')['grid']);
     }

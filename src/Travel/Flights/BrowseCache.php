@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Travel\Flights;
 
-use Carbon\Carbon;
 use Exception;
 use OzdemirBurak\SkyScanner\BaseRequest;
 
@@ -366,7 +365,7 @@ class BrowseCache extends BaseRequest
             'inboundPartialDate'      => $this->inboundPartialDate,
             'originPlace'             => $this->originPlace,
             'outboundPartialDate'     => !empty($this->outboundPartialDate) ? $this->outboundPartialDate
-                                         : Carbon::now()->addMonth(1)->format('Y-m'),
+                                         : date('Y-m', strtotime('+1 month')),
         ];
     }
 
