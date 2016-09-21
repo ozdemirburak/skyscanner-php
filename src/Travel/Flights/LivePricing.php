@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Travel\Flights;
 
-use Carbon\Carbon;
 use OzdemirBurak\SkyScanner\BaseRequest;
 use OzdemirBurak\SkyScanner\Traits\ImageTrait;
 
@@ -419,7 +418,9 @@ class LivePricing extends BaseRequest
     {
         foreach ($objects as $resultKey => $result) {
             foreach ($variables as $key => $variable) {
-                $results[$resultKey][$key] = $result->$variable;
+                if (isset($result->$variable)) {
+                    $results[$resultKey][$key] = $result->$variable;
+                }
             }
             $results[$resultKey]['image_path'] = $saveCarrierImage ?
                 $this->saveImage($result->ImageUrl, $this->savePath) :
@@ -510,7 +511,7 @@ class LivePricing extends BaseRequest
             'locationschema'          => $this->locationschema,
             'originplace'             => $this->originplace,
             'outbounddate'            => !empty($this->outbounddate) ? $this->outbounddate
-                                                                     : Carbon::now()->addWeek(1)->format('Y-m-d'),
+                                                                     : date('Y-m-d', strtotime('+1 week')),
         ]);
     }
 

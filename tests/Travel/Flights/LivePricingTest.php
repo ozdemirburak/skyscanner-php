@@ -2,7 +2,6 @@
 
 namespace OzdemirBurak\SkyScanner\Tests\Travel\Flights;
 
-use Carbon\Carbon;
 use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 
 class LivePricingTest extends \PHPUnit_Framework_TestCase
@@ -108,7 +107,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testRoundWithNonStop()
     {
         $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
+        $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
         $this->assertNotEmpty($pricing->parseFlights());
     }
     
@@ -118,7 +117,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testRoundWithMultipleStops()
     {
         $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['stops' => 2, 'inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
+        $pricing->setParameters(['stops' => 2, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
         $this->assertNotEmpty($pricing->parseFlights());
     }
 
@@ -138,7 +137,7 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testRoundWithNonStopWithoutCheapestFlights()
     {
         $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['inbounddate' => Carbon::now()->addWeek(2)->format('Y-m-d')]);
+        $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
         $this->assertNotEmpty($pricing->parseFlights(false));
     }
 }
