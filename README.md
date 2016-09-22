@@ -20,9 +20,10 @@ $ composer require ozdemirburak/skyscanner-php
 
 ## Usage
 
-See the **[wiki](https://github.com/ozdemirburak/skyscanner-php/wiki)** for more detailed information about the methods and the parameters.
+Please see the **[wiki](https://github.com/ozdemirburak/skyscanner-php/wiki)** for more detailed information about the methods and the parameters.
  
-Below is just the demonstration of how to use the methods.
+You can find a simple demonstration of how to use the methods below, or check the
+[tests](tests/) for more advanced examples.
 
 ### Flights: Live Pricing
 
@@ -34,7 +35,7 @@ $pricing->setParameters([
     'adults' => 1,
     'destinationplace' => 'IST',
     'originplace' => 'LHR',
-    'outbounddate' => Carbon::now()->addWeek(1)->format('Y-m-d'),
+    'outbounddate' => date('Y-m-d', strtotime('+1 week')),
     'stops' => 0
 ]);
 $flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
@@ -49,7 +50,7 @@ $cache = new BrowseCache($apiKey = 'your-api-key', $country = 'GB', $currency = 
 $cache->setParameters([
     'destinationPlace' => 'IST',
     'originPlace' => 'LHR',
-    'outboundPartialDate' => Carbon::now()->addWeek(1)->format('Y-m-d'),
+    'outboundPartialDate' => date('Y-m-d', strtotime('+1 week')),
 ]);
 $quotes = $cache->getData('browsequotes');
 ```
