@@ -4,8 +4,6 @@ namespace OzdemirBurak\SkyScanner\Traits;
 
 trait ImageTrait
 {
-    use ConsoleTrait;
-
     /**
      * Save image to specified path and return the full path with image name and extension
      *
@@ -28,7 +26,7 @@ trait ImageTrait
                         copy($image, $savePath);
                         return $savePath;
                     } catch (\Exception $e) {
-                        $this->printErrorMessage('Failed to download image, located at ' . $imagePath);
+                        echo 'Failed to download image, located at ' . $imagePath . ', Error: ' . $e->getMessage();
                     }
                 } else {
                     return $savePath;

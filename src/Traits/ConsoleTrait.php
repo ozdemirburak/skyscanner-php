@@ -39,7 +39,7 @@ trait ConsoleTrait
      *
      * @return int
      */
-    public function getMessageBackgroundColor($type)
+    protected function getMessageBackgroundColor($type)
     {
         if (in_array($type, ['info', 'error', 'comment'])) {
             return $this->{$type . 'Color'};
