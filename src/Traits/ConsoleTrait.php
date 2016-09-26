@@ -2,19 +2,65 @@
 
 namespace OzdemirBurak\SkyScanner\Traits;
 
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Formatter\OutputFormatter;
-
 trait ConsoleTrait
 {
     /**
-     * Print error message
+     * Grey
      *
-     * @param $joinString
+     * @var int
      */
-    protected function printSuccessMessage($joinString)
+    protected $commentColor = 8;
+
+    /**
+     * DarkBlue
+     *
+     * @var int
+     */
+    protected $defaultColor = 18;
+
+    /**
+     * Red
+     *
+     * @var int
+     */
+    protected $errorColor = 9;
+
+    /**
+     * DarkGreen
+     *
+     * @var int
+     */
+    protected $infoColor = 22;
+
+    /**
+     * Return the color number based on the type
+     *
+     * @param string $type
+     *
+     * @return int
+     */
+    public function getMessageBackgroundColor($type)
     {
-        $this->printInfoMessage(join(': ', ['Success', $joinString]), 'info');
+        if (in_array($type, ['info', 'error', 'comment'])) {
+            return $this->{$type . 'Color'};
+        }
+        return $this->defaultColor;
+    }
+
+    /**
+     * For the terminal colors, check the Xterm 256 color chart
+     *
+     * @link https://upload.wikimedia.org/wikipedia/en/1/15/Xterm_256color_chart.svg
+     *
+     * @param string    $string
+     * @param int       $background
+     * @param int       $foreground
+     *
+     * @return string
+     */
+    public function getMessageWithColor($string, $background = 0, $foreground = 255)
+    {
+        return "\033[38;5;{$foreground}m\033[48;5;{$background}m{$string}\033[0m";
     }
 
     /**
@@ -22,28 +68,29 @@ trait ConsoleTrait
      *
      * @param $joinString
      */
-    protected function printErrorMessage($joinString)
+    public function printSuccessMessage($joinString)
     {
-        $this->printInfoMessage(join(': ', ['Failed', $joinString]), 'error');
+        $this->printMessage(join(': ', ['Success', $joinString]), 'info');
     }
 
     /**
-     * Pretty print information messages to console, don't print if it's a phpunit test
+     * Print error message
+     *
+     * @param $joinString
+     */
+    public function printErrorMessage($joinString)
+    {
+        $this->printMessage(join(': ', ['Failed', $joinString]), 'error');
+    }
+
+    /**
+     * Pretty print information messages to console
      *
      * @param string $string
      * @param string $type
      */
-    protected function printInfoMessage($string, $type = 'comment')
+    public function printMessage($string, $type = 'comment')
     {
-        if (strpos($_SERVER['argv'][0], 'phpunit') === false) {
-            $output = new ConsoleOutput();
-            $output->setFormatter(new OutputFormatter(true));
-            $output->writeln(
-                "<$type>" .
-                $string . " => " .
-                date("Y-m-d H:i:s") .
-                "</$type>"
-            );
-        }
+        print $this->getMessageWithColor($string, $this->getMessageBackgroundColor($type));
     }
 }
