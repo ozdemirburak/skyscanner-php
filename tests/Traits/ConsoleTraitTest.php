@@ -14,9 +14,8 @@ class ConsoleTraitTest extends \PHPUnit_Framework_TestCase
     public function testMessage()
     {
         $message = 'This is an ordinary message';
-        $expected = $this->getMessageWithColor($message, $this->getMessageBackgroundColor('comment'));
         $this->printMessage($message);
-        $this->expectOutputString($expected);
+        $this->expectOutputString($this->getMessageWithColor($message, $this->commentColor));
     }
 
     /**
@@ -25,9 +24,8 @@ class ConsoleTraitTest extends \PHPUnit_Framework_TestCase
     public function testSuccessMessage()
     {
         $message = 'This is a success message';
-        $expected = $this->getMessageWithColor(join(' ', ['Success:', $message]), $this->getMessageBackgroundColor('info'));
         $this->printSuccessMessage($message);
-        $this->expectOutputString($expected);
+        $this->expectOutputString($this->getMessageWithColor(join(' ', ['Success:', $message]), $this->infoColor));
     }
 
     /**
@@ -36,9 +34,8 @@ class ConsoleTraitTest extends \PHPUnit_Framework_TestCase
     public function testErrorMessage()
     {
         $message = 'This is an error message';
-        $expected = $this->getMessageWithColor(join(' ', ['Failed:', $message]), $this->getMessageBackgroundColor('error'));
         $this->printErrorMessage($message);
-        $this->expectOutputString($expected);
+        $this->expectOutputString($this->getMessageWithColor(join(' ', ['Failed:', $message]), $this->errorColor));
     }
 
     /**
@@ -47,8 +44,7 @@ class ConsoleTraitTest extends \PHPUnit_Framework_TestCase
     public function testInvalidMessageType()
     {
         $message = 'This is a message';
-        $expected = $this->getMessageWithColor($message, $this->getMessageBackgroundColor('invalid'));
         $this->printMessage($message, 'invalid');
-        $this->expectOutputString($expected);
+        $this->expectOutputString($this->getMessageWithColor($message, $this->defaultColor));
     }
 }
