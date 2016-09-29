@@ -1,14 +1,14 @@
-# Unofficial SkyScanner PHP API
+# Unofficial PHP SDK for Skyscanner's API
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-This is an unofficial PHP API to support Flights, Car Hire and Hotels Services provided by 
-[SkyScanner](http://business.skyscanner.net/portal/en-GB/Documentation/ApiOverview).
+This is an unofficial PHP SDK for the [Skyscanner's API](http://business.skyscanner.net/portal/en-GB/Documentation/ApiOverview)
+to support Flights, Car Hire and Hotels services.
 
-Currently, only the Flights Service is implemented.
+Currently, only the Flights service is implemented.
 
 ## Install
 
