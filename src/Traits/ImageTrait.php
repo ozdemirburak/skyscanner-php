@@ -15,11 +15,10 @@ trait ImageTrait
     public function saveImage($imagePath, $saveDirPath)
     {
         $image = str_replace(' ', '%20', $imagePath);
-        if (strpos($image, '/') !== false) {
-            $split = explode('/', $image);
-            $fileName = str_replace('%20', '-', end($split));
-            if (!empty($fileName)) {
-                $savePath = preg_replace('~/+~', '/', join('/', [$saveDirPath, $fileName]));
+        if (strpos($image, DIRECTORY_SEPARATOR) !== false) {
+            $filename = str_replace('%20', '-', pathinfo($image, PATHINFO_BASENAME));
+            if (!empty($filename)) {
+                $savePath = preg_replace('~/+~', DIRECTORY_SEPARATOR, join(DIRECTORY_SEPARATOR, [$saveDirPath, $filename]));
                 if (!file_exists($savePath)) {
                     try {
                         $this->makeDirRecursive($saveDirPath);
