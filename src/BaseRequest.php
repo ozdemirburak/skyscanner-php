@@ -113,8 +113,7 @@ abstract class BaseRequest
     public function makeRequest($method = 'GET', $url = '', array $parameters = [])
     {
         try {
-            $isGet = strtolower($method) === 'get' ? true : false;
-            $parameters = !empty($parameters) ? $parameters : $this->getRequestParameters($isGet);
+            $parameters = !empty($parameters) ? $parameters : $this->getRequestParameters(strtolower($method) === 'get');
             return $this->response = $this->client->request($method, !empty($url) ? $url : $this->url, $parameters);
         } catch (RequestException $e) {
             $this->printErrorMessage(Psr7\str($e->getRequest()));
@@ -208,7 +207,7 @@ abstract class BaseRequest
     {
         $message = array_key_exists($status = $this->getResponseStatus(), $messages = $this->getResponseMessages()) ?
                    $messages[$status] : 'Unknown response';
-        return $withStatusCode ? join(' - ', [$status, $message]) : $message;
+        return $withStatusCode ? implode(' - ', [$status, $message]) : $message;
     }
 
     /**
