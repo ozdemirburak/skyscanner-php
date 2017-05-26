@@ -23,7 +23,7 @@ trait ReferralTrait
      */
     public function getReferralLinkByParameters($country, $currency, $locale, $originPlace, $destinationPlace, $outboundPartialDate, $inboundPartialDate, $apiKey)
     {
-        return $this->referralUrl . join('/', array_filter([
+        return $this->referralUrl . implode('/', array_filter([
             $country, $currency, $locale, $originPlace, $destinationPlace, $outboundPartialDate, $inboundPartialDate
         ])) . $this->getApiKeyQuery($apiKey);
     }
@@ -37,7 +37,7 @@ trait ReferralTrait
     public function getReferralLinkByArrayOfParameters($data, $apiKey)
     {
         if (is_array($data)) {
-            return $this->referralUrl . join('/', array_filter($data)) . $this->getApiKeyQuery($apiKey);
+            return $this->referralUrl . implode('/', array_filter($data)) . $this->getApiKeyQuery($apiKey);
         }
         return '';
     }

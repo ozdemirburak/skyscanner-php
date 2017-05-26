@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7;
 use OzdemirBurak\SkyScanner\Traits\ConsoleTrait;
 
-abstract class BaseRequest
+abstract class TravelService
 {
     use ConsoleTrait;
 
@@ -44,6 +44,13 @@ abstract class BaseRequest
     protected $currency = 'GBP';
 
     /**
+     * Data returned by SkyScanner API Request
+     *
+     * @var mixed
+     */
+    protected $data;
+
+    /**
      * ISO locale code (language and country)
      *
      * @link https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx
@@ -53,16 +60,30 @@ abstract class BaseRequest
     protected $locale = 'en-GB';
 
     /**
+     * Keep or remove IDs after being used
+     *
+     * @var bool
+     */
+    protected $removeIds = true;
+
+    /**
      * @var \Psr\Http\Message\ResponseInterface
      */
     protected $response;
-    
+
     /**
      * SkyScanner Request Provider
      *
      * @var string
      */
-    protected $url = '';
+    protected $url = 'http://partners.api.skyscanner.net/apiservices/';
+
+    /**
+     * URL to make the query
+     *
+     * @return string
+     */
+    abstract public function getUrl();
 
     /**
      * Auth constructor.
@@ -114,38 +135,15 @@ abstract class BaseRequest
     {
         try {
             $parameters = !empty($parameters) ? $parameters : $this->getRequestParameters(strtolower($method) === 'get');
-            return $this->response = $this->client->request($method, !empty($url) ? $url : $this->url, $parameters);
+            return $this->response = $this->client->request($method, $url, $parameters);
         } catch (RequestException $e) {
-            $this->printErrorMessage(Psr7\str($e->getRequest()));
+            $this->printErrorMessage(Psr7\str($e->getRequest()), false);
             if ($e->hasResponse()) {
                 $this->response = $e->getResponse();
-                $this->printErrorMessage(Psr7\str($e->getResponse()));
+                $this->printErrorMessage(Psr7\str($e->getResponse()), false);
             }
         }
         return false;
-    }
-
-    /**
-     * @param bool $isGet
-     *
-     * @return array
-     */
-    protected function getRequestParameters($isGet = true)
-    {
-        return [
-            $this->getMethod($isGet) => $this->getParameters($isGet),
-            'Accept' => 'application/json'
-        ];
-    }
-
-    /**
-     * @param bool $isGet
-     *
-     * @return string
-     */
-    protected function getMethod($isGet = true)
-    {
-        return $isGet === true ? 'query' : 'form_params';
     }
 
     /**
@@ -166,15 +164,20 @@ abstract class BaseRequest
     }
 
     /**
-     * @param array $array
+     * Just return data property without doing any modifications to the original one
      *
-     * @return array
+     * @param string $property
+     * @param bool   $reset
+     *
+     * @return mixed
      */
-    protected function filterArray(array $array)
+    public function get($property = null, $reset = false)
     {
-        return array_filter($array, function ($value) {
-            return ($value !== null && $value !== false && $value !== '');
-        });
+        if (empty($this->data) || $reset === true) {
+            $this->makeRequest('GET', $this->getUrl());
+            $this->data = $this->getResponseBody();
+        }
+        return !empty($property) ? $this->data->{$property} : $this->data;
     }
 
     /**
@@ -206,7 +209,7 @@ abstract class BaseRequest
     public function getResponseMessage($withStatusCode = true)
     {
         $message = array_key_exists($status = $this->getResponseStatus(), $messages = $this->getResponseMessages()) ?
-                   $messages[$status] : 'Unknown response';
+            $messages[$status] : 'Unknown response';
         return $withStatusCode ? implode(' - ', [$status, $message]) : $message;
     }
 
@@ -234,28 +237,12 @@ abstract class BaseRequest
     }
 
     /**
-     * Helper method for array search to locate the property with the given property
-     *
-     * @param $needle
-     * @param $haystack
-     * @param $property
-     *
-     * @return mixed
-     */
-    protected function arraySearch($needle, $haystack, $property)
-    {
-        return array_search($needle, array_map(function ($value) use ($property) {
-            return is_object($value) ? $value->$property : $value[$property];
-        }, $haystack));
-    }
-
-    /**
      * Returns specific response header defined by key
      *
-     * @param string $key
-     * @param bool   $first
+     * @param      $key
+     * @param bool $first
      *
-     * @return null
+     * @return string
      */
     public function getResponseHeader($key, $first = true)
     {
@@ -272,6 +259,126 @@ abstract class BaseRequest
     public function getClient()
     {
         return empty($this->client) ? new Client() : $this->client;
+    }
+
+    /**
+     * If you make too many requests, then you will probably have issues on rate limiting.
+     * So, until a non-empty location is received, it will make a request to get a session key.
+     *
+     * In other words, until the rate limit is reset, it will make a request to obtain a session key
+     *
+     * @param string $url
+     * @param string $method
+     * @param string $location
+     *
+     * Message: Rate limit has been exceeded: 100 PerMinute for PricingSession
+     *
+     * @return string
+     */
+    protected function getSessionKey($url, $method = 'POST', $location = '')
+    {
+        while (empty($location)) {
+            $this->makeRequest($method, $url);
+            $location = $this->getResponseHeader('Location');
+        }
+        $locationParameters = explode('/', $location);
+        return end($locationParameters);
+    }
+
+    /**
+     * @param bool $isGet
+     *
+     * @return array
+     */
+    protected function getRequestParameters($isGet = true)
+    {
+        return [
+            $this->getMethod($isGet) => $this->getParameters($isGet),
+            'Accept' => 'application/json'
+        ];
+    }
+
+    /**
+     * @param bool $isGet
+     *
+     * @return string
+     */
+    protected function getMethod($isGet = true)
+    {
+        return $isGet === true ? 'query' : 'form_params';
+    }
+
+    /**
+     * Replace parameters within the given string with their values.
+     * For instance replace the string {currency} with the string USD
+     *
+     * @param string $string
+     *
+     * @return mixed
+     */
+    protected function replaceParameters($string)
+    {
+        foreach ($this->getParameters() as $parameter => $value) {
+            $search = '{' . $parameter . '}';
+            if (strpos($string, $search) !== false) {
+                $string = str_replace($search, $value, $string);
+            }
+        }
+        return $string;
+    }
+
+    /**
+     * @param array $array
+     *
+     * @return array
+     */
+    protected function filterArray(array $array)
+    {
+        return array_filter($array, function ($value) {
+            return ($value !== null && $value !== false && $value !== '');
+        });
+    }
+
+    /**
+     * Helper method for array search to locate the property with the given property
+     *
+     * @param $needle
+     * @param $haystack
+     * @param $property
+     *
+     * @return mixed
+     */
+    protected function arraySearch($needle, $haystack, $property)
+    {
+        return array_search($needle, array_map(function ($value) use ($property) {
+            return is_object($value) ? $value->$property : $value[$property];
+        }, $haystack), true);
+    }
+
+    /**
+     * @param $url
+     *
+     * @return string
+     */
+    protected function getPollingQueryUrl($url)
+    {
+        $url .= '?apiKey=' . $this->getParameter('apiKey');
+        if (!empty($parameters = $this->getOptionalPollingParameters())) {
+            $url .= '&' . http_build_query($parameters);
+        }
+        return $url;
+    }
+
+    /**
+     * Get the X-Forwarded-For
+     *
+     * @return string
+     */
+    protected function getXForwardedFor()
+    {
+        return !empty($this->ip) ? $this->ip :
+            getenv('HTTP_CLIENT_IP') ?: getenv('HTTP_X_FORWARDED_FOR') ?: getenv('HTTP_X_FORWARDED') ?:
+                getenv('HTTP_FORWARDED_FOR') ?: getenv('HTTP_FORWARDED') ?: getenv('REMOTE_ADDR') ?: '127.0.0.1';
     }
 
     /**

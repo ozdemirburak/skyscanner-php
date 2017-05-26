@@ -7,137 +7,79 @@ use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 class LivePricingTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @group live-pricing-methods
+     * @group flights-live-pricing-methods
      */
-    public function testDefaultParameters()
-    {
-        $pricing = new LivePricing();
-        $this->assertEquals('GB', $pricing->getParameter('country'));
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testInvalidParameter()
-    {
-        $pricing = new LivePricing();
-        $this->assertNull($pricing->getParameter('dummy'));
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testParameterAssignmentByConstructor()
+    public function testParameters()
     {
         $pricing = new LivePricing('something');
+        $pricing->setParameters(['currency' => 'TRY']);
+        $this->assertEquals('GB', $pricing->getParameter('country'));
         $this->assertEquals('something', $pricing->getParameter('apiKey'));
+        $this->assertNull($pricing->getParameter('dummy'));
+        $this->assertEquals('TRY', $pricing->getParameter('currency'));
     }
 
     /**
-     * @group live-pricing-methods
+     * @group flights-live-pricing-raw-data
      */
-    public function testParameterAssignmentByFunction()
+    public function testRawDataProperties()
     {
-        $pricing = new LivePricing();
-        $pricing->setParameters(['apiKey' => 'something']);
-        $this->assertEquals('something', $pricing->getParameter('apiKey'));
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testRequestWithoutApiKey()
-    {
-        $pricing = new LivePricing();
-        $pricing->makeRequest('POST');
-        $this->assertEquals(403, $pricing->getResponseStatus());
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testWithApiKey()
-    {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->makeRequest('POST');
-        $this->assertEquals(201, $pricing->getResponseStatus());
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testUrl()
-    {
-        $pricing = new LivePricing(API_KEY);
-        $this->assertNotEmpty($pricing->getUrl());
-    }
-
-    /**
-     * @group live-pricing-methods
-     */
-    public function testResponseContentType()
-    {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->makeRequest('POST');
+        $pricing = $this->getLivePricing();
+        $data = $pricing->get();
+        $this->assertEquals(200, $pricing->getResponseStatus());
         $this->assertEquals('application/json', $pricing->getResponseHeader('Content-Type'));
+        $this->assertNotEmpty($data);
+        foreach (['Agents', 'Carriers', 'Currencies', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'] as $property) {
+            $data = $pricing->get($property);
+            $this->assertNotEmpty($data);
+        }
+        $this->assertEquals($pricing->get('Query')->Country, $pricing->getParameter('country'));
     }
 
     /**
-     * @group live-pricing-flights
+     * @group flights-live-pricing-direct-flights
      */
-    public function testOneWayWithNonStop()
+    public function testOneWayDirect()
     {
-        $pricing = new LivePricing(API_KEY);
-        $this->assertNotEmpty($pricing->parseFlights());
+        $pricing = $this->getLivePricing();
+        $this->assertNotEmpty($pricing->getFlights());
     }
 
     /**
-     * @group live-pricing-flights
+     * @group flights-live-pricing-one-stop-flights
      */
-    public function testOneWayWithMultipleStops()
+    public function testOneWayWithOneStop()
     {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['stops' => 2]);
-        $this->assertNotEmpty($pricing->parseFlights());
+        $pricing = $this->getLivePricing();
+        $pricing->setParameters(['stops' => 1]);
+        $this->assertNotEmpty($pricing->getFlights());
     }
-    
+
     /**
-     * @group live-pricing-flights
+     * @group flights-live-pricing-direct-flights
      */
-    public function testRoundWithNonStop()
+    public function testRoundDirect()
     {
-        $pricing = new LivePricing(API_KEY);
+        $pricing = $this->getLivePricing();
         $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $this->assertNotEmpty($pricing->parseFlights());
-    }
-    
-    /**
-     * @group live-pricing-flights
-     */
-    public function testRoundWithMultipleStops()
-    {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['stops' => 2, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $this->assertNotEmpty($pricing->parseFlights());
+        $this->assertNotEmpty($pricing->getFlights());
     }
 
     /**
-     * @group live-pricing-flights
+     * @group flights-live-pricing-one-stop-flights
      */
-    public function testOneWayWithMultipleStopsWithoutCheapestFlights()
+    public function testRoundWithOneStop()
     {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['stops' => 2]);
-        $this->assertNotEmpty($pricing->parseFlights(false));
+        $pricing = $this->getLivePricing();
+        $pricing->setParameters(['stops' => 1, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
+        $this->assertNotEmpty($pricing->getFlights());
     }
 
     /**
-     * @group live-pricing-flights
+     * @return \OzdemirBurak\SkyScanner\Travel\Flights\LivePricing
      */
-    public function testRoundWithNonStopWithoutCheapestFlights()
+    private function getLivePricing()
     {
-        $pricing = new LivePricing(API_KEY);
-        $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $this->assertNotEmpty($pricing->parseFlights(false));
+        return new LivePricing(API_KEY);
     }
 }

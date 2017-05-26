@@ -6,9 +6,9 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 This is an unofficial PHP SDK for the [Skyscanner's API](http://business.skyscanner.net/portal/en-GB/Documentation/ApiOverview)
-to support Flights, Car Hire and Hotels services.
+to support Flights, Car Hire, Localisation and Places services.
 
-Currently, only the Flights service is implemented.
+Currently, only the Places service is not implemented.
 
 ## Install
 
@@ -38,7 +38,7 @@ $pricing->setParameters([
     'outbounddate' => date('Y-m-d', strtotime('+1 week')),
     'stops' => 0
 ]);
-$flights = $pricing->parseFlights($onlyCheapestAgentPerItinerary = true);
+$flights = $pricing->getFlights($onlyFirstAgentPerItinerary = true);
 ```
 
 ### Flights: BrowseCache
@@ -52,9 +52,52 @@ $cache->setParameters([
     'originPlace' => 'LHR',
     'outboundPartialDate' => date('Y-m-d', strtotime('+1 week')),
 ]);
-$quotes = $cache->getData('browsequotes');
+$quotes = $cache->getPrices('browsequotes')['Quotes'];
 ```
     
+### Car Hire: Live Pricing
+
+``` php
+use OzdemirBurak\SkyScanner\Travel\CarHire\LivePricing;
+
+$pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$pricing->setParameters([
+    'dropoffplace' => 'ADB',
+    'dropoffdatetime' => date('Y-m-d\TH:i', strtotime('+2 week')),
+    'pickupplace' => 'IST',
+    'pickupdatetime' => date('Y-m-d\TH:i', strtotime('+1 week')),
+    'driverage' => 21
+]);
+$cars = $pricing->getCars();
+```
+    
+### Localisation: Currency
+
+``` php
+use OzdemirBurak\SkyScanner\Localisation\Currency;
+
+$currency = new Currency($apiKey = 'your-api-key');
+$currencies = $currency->fetch();
+```
+    
+### Localisation: Locale
+
+``` php
+use OzdemirBurak\SkyScanner\Localisation\Locale;
+
+$locale = new Locale($apiKey = 'your-api-key');
+$locales = $locale->fetch();
+```
+    
+### Localisation: Market
+
+``` php
+use OzdemirBurak\SkyScanner\Localisation\Market;
+
+$market = new Market($apiKey = 'your-api-key', $locale = 'en-GB'));
+$countries = $market->fetch();
+```
+
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.

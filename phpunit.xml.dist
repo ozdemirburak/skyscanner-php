@@ -20,7 +20,7 @@
         </whitelist>
     </filter>
     <php>
-        <const name="API_KEY" value="prtl6749387986743898559646983194"/>
+        <const name="API_KEY" value="py495888586774232134437415165965"/>
     </php>
     <logging>
         <log type="tap" target="build/report.tap"/>

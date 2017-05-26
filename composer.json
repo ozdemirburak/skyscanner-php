@@ -24,11 +24,8 @@
         "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
-        "phpunit/phpunit" : "~4.0|~5.0"
-    },
-    "suggest": {
-        "symfony/var-dumper": "Better exploring and dumping for the PHP variables.",
-        "nesbot/carbon": "Makes date/datetime objects easier to handle."
+        "phpunit/phpunit" : "~4.0|~5.0",
+        "symfony/var-dumper": "~3.0"
     },
     "autoload": {
         "psr-4": {

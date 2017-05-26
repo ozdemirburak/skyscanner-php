@@ -2,25 +2,11 @@
 
 namespace OzdemirBurak\SkyScanner\Travel\Flights;
 
-use Exception;
-use OzdemirBurak\SkyScanner\BaseRequest;
+use OzdemirBurak\SkyScanner\TravelService;
+use OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException;
 
-class BrowseCache extends BaseRequest
+class BrowseCache extends TravelService
 {
-    /**
-     * Carrier variables that will be stored
-     *
-     * @var array
-     */
-    protected $carrierVariables = ['id' => 'CarrierId', 'name' => 'Name'];
-
-    /**
-     * Date variables that will be stored
-     *
-     * @var array
-     */
-    protected $dateVariables = ['outbound' => 'OutboundDates', 'inbound' => 'InboundDates'];
-
     /**
      * The destination city or airport
      *
@@ -39,27 +25,16 @@ class BrowseCache extends BaseRequest
     protected $flattenSingleCarrier = true;
 
     /**
-     * Data that is parsed via API call
-     *
-     * @var array
-     */
-    protected $data = [];
-
-    /**
-     * Flight variables that will be stored
-     *
-     * @var array
-     */
-    protected $flightVariables = [
-        'id' => 'QuoteId', 'is_direct' => 'Direct', 'minimum_price' => 'MinPrice', 'updated_at' => 'QuoteDateTime'
-    ];
-
-    /**
      * Needed for X-Forwarded-For
      *
      * @var string
      */
     protected $ip;
+
+    /**
+     * @var string
+     */
+    protected $method = 'browsequotes';
 
     /**
      * Valid Browse Cache methods
@@ -96,86 +71,40 @@ class BrowseCache extends BaseRequest
     protected $originPlace = 'LHR';
 
     /**
-     * Flight variables that will be stored
-     *
      * @var array
      */
-    protected $placeVariables = [
-        'id' => 'PlaceId', 'iata' => 'IataCode', 'name' => 'Name', 'type' => 'Type',
-        'skyscanner_code' => 'SkyscannerCode', 'city_name' => 'CityName', 'city_id' => 'CityId',
-        'country_name' => 'CountryName'
-    ];
+    protected $prices = [];
 
     /**
-     * SkyScanner Request Provider
-     *
-     * @var string
+     * @return string
      */
-    protected $url = 'http://partners.api.skyscanner.net/apiservices/{method}/v1.0/{country}/{currency}/{locale}/{originPlace}/{destinationPlace}/{outboundPartialDate}/{inboundPartialDate}';
-
-    /**
-     * @param string $method
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getData($method = 'browsequotes')
+    public function getUrl()
     {
-        if (!in_array($method, $this->methods)) {
-            throw new Exception('Invalid Browse Cache method');
-        }
-        $this->makeRequest('GET', $this->getUrl($method));
-        if ($this->getResponseStatus() === 200) {
-            $data = $this->getResponseBody();
-            $this->addCollection('carriers', $data->Carriers, $this->carrierVariables, 'CarrierId');
-            $this->addCollection('places', $data->Places, $this->placeVariables, 'PlaceId');
-            if (!empty($data->Quotes)) {
-                $this->addQuotes($data->Quotes);
+        $uri = '{country}/{currency}/{locale}/{originPlace}/{destinationPlace}/{outboundPartialDate}/{inboundPartialDate}';
+        $this->url = str_replace('{method}', $this->method, $this->url . '{method}/v1.0/') . $this->replaceParameters($uri);
+        return $this->url;
+    }
+
+    /**
+     * @return array
+     * @throws \OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException
+     */
+    public function getPrices()
+    {
+        if ($this->init()) {
+            // If method is grid or routes, then there may not be any quotes
+            if (!empty($this->data->Quotes)) {
+                $this->prices['Quotes'] = $this->addQuotes();
             }
-            if ($method !== 'browsequotes') {
-                $array = explode('browse', $method);
-                $classMethod = 'add' . ucwords(end($array));
-                $this->$classMethod($data);
+            if ($this->method !== 'browsequotes') {
+                $method = ucwords(str_replace('browse', '', $this->method));
+                $this->prices[$method] = $this->{'add' . $method}();
             }
-            $this->data['referral_url'] = $this->getReferralUrl($method);
-            $this->resetKeys();
+            $this->prices['ReferralUrl'] = $this->data->ReferralUrl = $this->getReferralUrl();
         } else {
             $this->printErrorMessage($this->getResponseMessage());
         }
-        return $this->data;
-    }
-
-    /**
-     * @param $method
-     *
-     * @return string
-     */
-    public function getUrl($method = 'browsequotes')
-    {
-        foreach ($this->getParameters() as $parameter => $value) {
-            $search = '{' . $parameter . '}';
-            if (strpos($this->url, $search) !== false) {
-                $this->url = str_replace($search, $value, $this->url);
-            }
-        }
-        return $this->url = str_replace('{method}', $method, $this->url);
-    }
-
-    /**
-     * @param $key
-     * @param $collection
-     * @param $variables
-     * @param $identifier
-     */
-    protected function addCollection($key, $collection, $variables, $identifier)
-    {
-        foreach ($collection as $object) {
-            foreach ($variables as $new => $old) {
-                if (isset($object->$old)) {
-                    $this->data[$key][$object->$identifier][$new] = $object->$old;
-                }
-            }
-        }
+        return $this->prices;
     }
 
     /**
@@ -199,34 +128,32 @@ class BrowseCache extends BaseRequest
      *  Find me the cheapest prices from Edinburgh to London departing on 5th January and returning on 6th February.
      *  This gives the cheapest prices for these days.
      *
-     * @param $quotes
-     *
      * @link http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheQuotes
      */
-    protected function addQuotes($quotes)
+    protected function addQuotes()
     {
-        foreach ($quotes as $quote) {
-            $id = $quote->QuoteId - 1;
-            foreach ($this->flightVariables as $newVariable => $oldVariable) {
-                if (isset($quote->$oldVariable)) {
-                    $this->data['quotes'][$id][$newVariable] = $quote->$oldVariable;
+        foreach ($this->data->Quotes as &$quote) {
+            foreach (['OutboundLeg', 'InboundLeg'] as $leg) {
+                if (isset($quote->$leg)) {
+                    foreach ($quote->$leg->CarrierIds as $key => $carrierId) {
+                        $carrier = $this->arraySearch($carrierId, $this->data->Carriers, 'CarrierId');
+                        $quote->Carriers[] = $this->data->Carriers[$carrier];
+                    }
+                    if ($this->flattenSingleCarrier === true && count($quote->$leg->CarrierIds) === 1) {
+                        $quote->Carrier = $quote->Carriers[0];
+                        unset($quote->Carriers);
+                    }
+                    foreach (['Origin' => 'OriginId', 'Destination' => 'DestinationId'] as $variable => $search) {
+                        $place = $this->arraySearch($quote->$leg->$search, $this->data->Places, 'PlaceId');
+                        $quote->$variable = $this->data->Places[$place];
+                    }
                 }
-            }
-            foreach (['outbound_leg' => 'OutboundLeg', 'inbound_leg' => 'InboundLeg'] as $new => $old) {
-                if (isset($quote->$old)) {
-                    foreach ($quote->$old->CarrierIds as $key => $carrierId) {
-                        $this->data['quotes'][$id][$new]['carrier'][$key] = $this->data['carriers'][$carrierId];
-                    }
-                    if (count($quote->$old->CarrierIds) === 1 && $this->flattenSingleCarrier === true) {
-                        $this->data['quotes'][$id][$new]['carrier'] = $this->data['quotes'][$id][$new]['carrier'][0];
-                    }
-                    foreach (['origin' => 'OriginId', 'destination' => 'DestinationId'] as $variable => $search) {
-                        $this->data['quotes'][$id][$new][$variable] = $this->data['places'][$quote->$old->$search];
-                    }
-                    $this->data['quotes'][$id][$new]['departs_at'] = $quote->$old->DepartureDate;
+                if ($this->removeIds === true) {
+                    unset($quote->$leg->CarrierIds, $quote->$leg->OriginId, $quote->$leg->DestinationId);
                 }
             }
         }
+        return $this->data->Quotes;
     }
 
     /**
@@ -239,20 +166,22 @@ class BrowseCache extends BaseRequest
      *  returning in February. This gives the cheapest known price for each destination country that
      *  can be reached from London.
      *
-     * @param $data
-     *
      * @link http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheRoutes
+     *
+     * @param array $routes
+     *
+     * @return array
      */
-    protected function addRoutes($data)
+    protected function addRoutes(array $routes = [])
     {
-        $variables = ['cheapest_price' => 'Price', 'updated_at' => 'QuoteDateTime'];
-        foreach ($data->Routes as $key => $route) {
-            foreach (['origin' => 'OriginId', 'destination' => 'DestinationId'] as $index => $identifier) {
-                $this->data['routes'][$key][$index] = $this->data['places'][$route->$identifier];
+        foreach ($this->data->Routes as $key => $route) {
+            foreach (['Origin' => 'OriginId', 'Destination' => 'DestinationId'] as $index => $identifier) {
+                $place = $this->arraySearch($route->$identifier, $this->data->Places, 'PlaceId');
+                $routes[$key][$index] = $this->data->Places[$place];
             }
-            $this->pushVariables($route, 'routes', $key, $variables);
-            $this->pushQuotes($route, 'routes', $key);
+            $routes[$key] = $this->syncQuotes($route, $routes[$key], 'QuoteIds');
         }
+        return $routes;
     }
 
     /**
@@ -271,21 +200,22 @@ class BrowseCache extends BaseRequest
      *  Find me the cheapest prices from Edinburgh to London departing on 5th January and returning on 6th February.
      *  This gives the cheapest prices for these days.
      *
-     * @param $data
+     * @param array $dates
      *
-     * @link  http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheDates
+     * @return mixed
+     *
+     * @link     http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheDates
      */
-    protected function addDates($data)
+    protected function addDates(array $dates = [])
     {
-        $variables = ['date' => 'PartialDate', 'cheapest_price' => 'Price', 'updated_at' => 'QuoteDateTime'];
-        foreach ($this->dateVariables as $new => $old) {
-            if (isset($data->Dates->$old)) {
-                foreach ($data->Dates->$old as $key => $date) {
-                    $this->pushVariables($date, 'dates', $key, $variables);
-                    $this->pushQuotes($date, 'dates', $key);
+        foreach (['OutboundDates', 'InboundDates'] as $date) {
+            if (!empty($this->data->Dates->$date)) {
+                foreach ($this->data->Dates->$date as $key => $datum) {
+                    $dates[$key] = $this->syncQuotes($datum, [], 'QuoteIds');
                 }
             }
         }
+        return $dates;
     }
 
     /**
@@ -297,48 +227,65 @@ class BrowseCache extends BaseRequest
      *  Find me the cheapest prices from Edinburgh to London departing in January and returning in February.
      *  This gives the cheapest prices for combination of all days in January with all days in February.
      *
-     * @param $data
+     * @param array $grid
      *
-     * @link  http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheGrid
+     * @return array
+     *
+     * @link     http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheGrid
      */
-    protected function addGrid($data)
+    protected function addGrid(array $grid = [])
     {
-        $variables = ['minimum_price' => 'MinPrice', 'updated_at' => 'QuoteDateTime'];
-        foreach ($data->Dates[1] as $key => $object) {
-            if (isset($data->Dates[0][$key]->DateString)) {
-                $this->pushVariables($object, 'grid', $data->Dates[0][$key]->DateString, $variables);
+        if (isset($this->data->Dates[1])) {
+            foreach ($this->data->Dates[1] as $key => $object) {
+                if (!empty($object) && !empty($this->data->Dates[0][$key]->DateString)) {
+                    $grid[$key] = $object;
+                    $grid[$key]->DateString = $this->data->Dates[0][$key]->DateString;
+                }
             }
         }
-    }
-
-    /**
-     * @param $object
-     * @param $collection
-     * @param $key
-     * @param $variables
-     */
-    protected function pushVariables($object, $collection, $key, $variables)
-    {
-        foreach ($variables as $newVariable => $oldVariable) {
-            if (isset($object->$oldVariable)) {
-                $this->data[$collection][$key][$newVariable] = $object->$oldVariable;
-            }
-        }
+        return $grid;
     }
 
     /**
      * @param        $object
-     * @param        $collection
-     * @param        $key
-     * @param string $identifier
+     * @param        $data
+     * @param string $property
+     *
+     * @return mixed
      */
-    protected function pushQuotes($object, $collection, $key, $identifier = 'quotes')
+    protected function syncQuotes($object, $data, $property = 'QuoteIds')
     {
-        if (!empty($object->QuoteIds)) {
-            foreach ($object->QuoteIds as $id => $quote) {
-                $this->data[$collection][$key][$identifier][$id] = $this->data[$identifier][$id];
+        if (!empty($object->$property)) {
+            foreach ($object->$property as $quoteId) {
+                $quote = $this->arraySearch($quoteId, $this->data->Quotes, 'QuoteId');
+                $data['Quotes'][] = $this->data->Quotes[$quote];
             }
         }
+        return $data;
+    }
+
+    /**
+     * @link http://business.skyscanner.net/portal/en-GB/Documentation/Referrals
+     *
+     * @return string
+     */
+    protected function getReferralUrl()
+    {
+        return str_replace($this->method, 'referral', $this->url) . '?apiKey=' . substr($this->apiKey, 0, 16);
+    }
+
+    /**
+     * @return bool
+     * @throws \OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException
+     */
+    private function init()
+    {
+        if (!in_array($this->method, $this->methods, true)) {
+            throw new InvalidMethodException('Invalid Browse Cache method');
+        }
+        $this->prices = [];
+        $this->get();
+        return $this->getResponseStatus() === 200;
     }
 
     /**
@@ -348,11 +295,9 @@ class BrowseCache extends BaseRequest
      */
     protected function getRequestParameters($isGet = true)
     {
-        return [
-            $this->getMethod($isGet) => ['apiKey' => $this->apiKey],
-            'Accept' => 'application/json',
+        return array_merge(parent::getRequestParameters($isGet), [
             'X-Forwarded-For' => $this->getXForwardedFor()
-        ];
+        ]);
     }
 
     /**
@@ -361,47 +306,11 @@ class BrowseCache extends BaseRequest
     protected function getOptionalPollingParameters()
     {
         return [
-            'destinationPlace'        => $this->destinationPlace,
-            'inboundPartialDate'      => $this->inboundPartialDate,
-            'originPlace'             => $this->originPlace,
-            'outboundPartialDate'     => !empty($this->outboundPartialDate) ? $this->outboundPartialDate
-                                         : date('Y-m', strtotime('+1 month')),
+            'destinationPlace'    => $this->destinationPlace,
+            'inboundPartialDate'  => $this->inboundPartialDate,
+            'originPlace'         => $this->originPlace,
+            'outboundPartialDate' => !empty($this->outboundPartialDate) ? $this->outboundPartialDate :
+                                     date('Y-m', strtotime('+1 month'))
         ];
-    }
-
-    /**
-     * @return string
-     */
-    protected function getXForwardedFor()
-    {
-        return !empty($this->ip) ? $this->ip :
-            getenv('HTTP_CLIENT_IP') ?: getenv('HTTP_X_FORWARDED_FOR') ?: getenv('HTTP_X_FORWARDED') ?:
-                getenv('HTTP_FORWARDED_FOR') ?: getenv('HTTP_FORWARDED') ?: getenv('REMOTE_ADDR');
-    }
-
-    /**
-     * @param $method
-     *
-     * @link http://business.skyscanner.net/portal/en-GB/Documentation/Referrals
-     *
-     * @return string
-     */
-    protected function getReferralUrl($method)
-    {
-        return str_replace($method, 'referral', $this->url) . '?apiKey=' . substr($this->apiKey, 0, 16);
-    }
-
-    /**
-     * Ids are being used to find the objects from the collections easily for the quotes and routes,
-     * However, there is no need to keep them as key after the identification.
-     */
-    private function resetKeys()
-    {
-        if (isset($this->data['places'])) {
-            $this->data['places'] = array_values($this->data['places']);
-        }
-        if (isset($this->data['carriers'])) {
-            $this->data['carriers'] = array_values($this->data['carriers']);
-        }
     }
 }

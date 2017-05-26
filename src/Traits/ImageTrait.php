@@ -5,27 +5,36 @@ namespace OzdemirBurak\SkyScanner\Traits;
 trait ImageTrait
 {
     /**
+     * Image save path for agents and carriers, optional
+     *
+     * @var string
+     */
+    protected $savePath = '/tmp/images/';
+
+    /**
      * Save image to specified path and return the full path with image name and extension
      *
-     * @param $imagePath
-     * @param $saveDirPath
+     * @param        $imagePath
+     * @param        $saveDirPath
+     * @param string $separator
      *
      * @return string
      */
-    public function saveImage($imagePath, $saveDirPath)
+    public function saveImage($imagePath, $saveDirPath, $separator = '-')
     {
-        $image = str_replace(' ', '%20', $imagePath);
-        if (strpos($image, DIRECTORY_SEPARATOR) !== false) {
-            $filename = str_replace('%20', '-', pathinfo($image, PATHINFO_BASENAME));
+        if (strpos($image = str_replace(' ', '%20', $imagePath), DIRECTORY_SEPARATOR) !== false) {
+            $filename = str_replace('%20', $separator, pathinfo($image, PATHINFO_BASENAME));
             if (!empty($filename)) {
-                $savePath = preg_replace('~/+~', DIRECTORY_SEPARATOR, join(DIRECTORY_SEPARATOR, [$saveDirPath, $filename]));
+                $savePath = preg_replace('~/+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, [$saveDirPath, $filename]));
                 if (!file_exists($savePath)) {
                     try {
                         $this->makeDirRecursive($saveDirPath);
                         copy($image, $savePath);
                         return $savePath;
                     } catch (\Exception $e) {
-                        echo 'Failed to download image, located at ' . $imagePath . ', Error: ' . $e->getMessage();
+                        if (strpos($_SERVER['argv'][0], 'phpunit') === false) {
+                            echo 'Failed to download image, located at ' . $imagePath . ', Error: ' . $e->getMessage() . "\n";
+                        }
                     }
                 } else {
                     return $savePath;
