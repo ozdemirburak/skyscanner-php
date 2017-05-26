@@ -28,7 +28,7 @@ trait ImageTrait
                 $savePath = preg_replace('~/+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, [$saveDirPath, $filename]));
                 if (!file_exists($savePath)) {
                     try {
-                        $this->makeDirRecursive($saveDirPath);
+                        is_dir($saveDirPath) || mkdir($saveDirPath, 0777, true);
                         copy($image, $savePath);
                         return $savePath;
                     } catch (\Exception $e) {
@@ -42,18 +42,5 @@ trait ImageTrait
             }
         }
         return '';
-    }
-
-    /**
-     * Create directory recursively if not exists
-     *
-     * @param     $path
-     * @param int $mode
-     *
-     * @return bool
-     */
-    protected function makeDirRecursive($path, $mode = 0777)
-    {
-        return is_dir($path) || mkdir($path, $mode, true);
     }
 }
