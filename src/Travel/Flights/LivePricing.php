@@ -260,7 +260,7 @@ class LivePricing extends TravelService
     public function getUrl()
     {
         $url = $this->url . 'pricing/v1.0/';
-        return $url . $this->getPollingQueryUrl($this->getSessionKey($url));
+        return $url . $this->getSessionKey($url);
     }
 
     /**
