@@ -52,7 +52,7 @@ $cache->setParameters([
     'originPlace' => 'LHR',
     'outboundPartialDate' => date('Y-m-d', strtotime('+1 week')),
 ]);
-$quotes = $cache->getPrices('browsequotes')['Quotes'];
+$quotes = $cache->getPrices()['Quotes'];
 ```
     
 ### Car Hire: Live Pricing
