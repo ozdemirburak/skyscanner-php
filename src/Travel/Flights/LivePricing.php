@@ -2,23 +2,12 @@
 
 namespace OzdemirBurak\SkyScanner\Travel\Flights;
 
-use OzdemirBurak\SkyScanner\BaseRequest;
+use OzdemirBurak\SkyScanner\TravelService;
 use OzdemirBurak\SkyScanner\Traits\ImageTrait;
 
-class LivePricing extends BaseRequest
+class LivePricing extends TravelService
 {
     use ImageTrait;
-
-    /**
-     * Agent variables that will be stored
-     *
-     * @var array
-     */
-    protected $agentVariables = [
-        'id' => 'Id', 'name' => 'Name', 'status' => 'Status',
-        'optimised_for_mobile' => 'OptimisedForMobile', 'type' => 'Type',
-        'image_path' => 'ImageUrl'
-    ];
 
     /**
      * The number of adult passengers
@@ -44,13 +33,6 @@ class LivePricing extends BaseRequest
      * @var string
      */
     protected $carrierschema = 'Iata';
-
-    /**
-     * Carrier variables that will be stored
-     *
-     * @var array
-     */
-    protected $carrierVariables = ['id' => 'Id', 'code' => 'Code', 'name' => 'Name', 'display_code' => 'DisplayCode'];
 
     /**
      * The number of children passengers
@@ -166,25 +148,6 @@ class LivePricing extends BaseRequest
     protected $infants = 0;
 
     /**
-     * Itinerary variables parsed from API with the edited key as the key and the original key as the value
-     *
-     * @var array
-     */
-    protected $itineraryPricingVariables = [
-        'price' => 'Price', 'url' => 'DeeplinkUrl', 'age' => 'QuoteAgeInMinutes', 'detail' => 'Agents'
-    ];
-
-    /**
-     * Variables to store within legs
-     *
-     * @var array
-     */
-    protected $legVariables = [
-        'id' => 'Id', 'origin' => 'OriginStation', 'destination' => 'DestinationStation', 'departs_at' => 'Departure',
-        'arrives_at' => 'Arrival', 'duration' => 'Duration', 'direction' => 'Directionality'
-    ];
-
-    /**
      ** The code schema used for locations
      *
      * Supported values are: Iata, GeoNameCode, GeoNameId, Rnid, Sky
@@ -262,27 +225,13 @@ class LivePricing extends BaseRequest
     protected $saveCarrierImages = false;
 
     /**
-     * Image save path for agents and carriers, optional
-     *
-     * @var string
-     */
-    protected $savePath = '/tmp/images/';
-
-    /**
      * Filter for maximum number of stops
      *
-     * Supported values are: 0, 1, 2, 3
+     * Supported values are: 0, 1
      *
      * @var string
      */
     protected $stops = 0;
-
-    /**
-     * The Session key to identify the session.
-     *
-     * @var string
-     */
-    protected $session;
 
     /**
      * The property to sort on. If specified, you must also specify sortorder
@@ -304,70 +253,30 @@ class LivePricing extends BaseRequest
     protected $sortorder = 'asc';
 
     /**
-     * SkyScanner Request Provider
-     *
-     * @var string
-     */
-    protected $url = 'http://partners.api.skyscanner.net/apiservices/pricing/v1.0/';
-
-    /**
-     * If you make too many requests, then you will probably have issues on rate limiting.
-     * So, until a non-empty location is received, it will make a request.
-     * In other words, until the rate limit is reset, it will make a request.
-     *
-     * Message: Rate limit has been exceeded: 100 PerMinute for PricingSession
-     *
-     * @param bool   $resetSession
-     * @param string $location
+     * Full URL
      *
      * @return string
      */
-    public function getUrl($resetSession = false, $location = '')
+    public function getUrl()
     {
-        if (empty($this->session) || $resetSession === true) {
-            while (empty($location)) {
-                $this->makeRequest('POST');
-                $location = $this->getLocation();
-            }
-            $locationParameters = explode('/', $location);
-            $this->session = end($locationParameters);
-            $this->url .= $this->session . '?apiKey=' . $this->getParameter('apiKey') . '&' .
-                          http_build_query($this->getOptionalPollingParameters());
-            $this->flights = [];
-        }
-        return $this->url;
+        $url = $this->url . 'pricing/v1.0/';
+        return $url . $this->getPollingQueryUrl($this->getSessionKey($url));
     }
 
     /**
-     * @param bool $onlyCheapestAgentPerItinerary
+     * Get modified data where the each agent and carrier is assigned to each itinerary
+     * If you only want to get get the first one, it will remove Agents property
+     * Whereas Agent property will hold the first agent within the array sorted with given sorttype property
+     *
+     * @param bool $onlyFirstAgentPerItinerary
      *
      * @return array
      */
-    public function parseFlights($onlyCheapestAgentPerItinerary = true)
+    public function getFlights($onlyFirstAgentPerItinerary = true)
     {
-        $this->makeRequest('GET', $this->getUrl());
-        if ($this->getResponseStatus() === 200) {
-            $data = $this->getResponseBody();
-            foreach ($data->Itineraries as $key => $itinerary) {
-                foreach (['outbound_leg_id' => 'OutboundLegId', 'inbound_leg_id' => 'InboundLegId'] as $new => $old) {
-                    if (isset($itinerary->$old)) {
-                        $this->flights[$key][$new] = $itinerary->$old;
-                    }
-                }
-                if ($onlyCheapestAgentPerItinerary) {
-                    $this->addAgent($key, $itinerary->PricingOptions[0]);
-                } else {
-                    foreach ($itinerary->PricingOptions as $itineraryKey => $agent) {
-                        $this->addAgent($key, $agent, $itineraryKey);
-                    }
-                }
-            }
-            $this->beautifyFlights(
-                $this->getCarriersOrAgents($data->Agents, $this->agentVariables, $this->saveAgentImages),
-                $this->getCarriersOrAgents($data->Carriers, $this->carrierVariables, $this->saveCarrierImages),
-                $this->getLegs($data)
-            );
-            $this->cleanVariables();
+        if ($this->init()) {
+            $this->addItineraries($onlyFirstAgentPerItinerary);
+            $this->beautifyFlights($onlyFirstAgentPerItinerary);
         } else {
             $this->printErrorMessage($this->getResponseMessage());
         }
@@ -375,124 +284,106 @@ class LivePricing extends BaseRequest
     }
 
     /**
-     * @param         $key
-     * @param         $itinerary
-     * @param integer $itineraryKey
+     * @return array
      */
-    private function addAgent($key, $itinerary, $itineraryKey = 0)
+    public function getMeta()
     {
-        foreach ($this->itineraryPricingVariables as $new => $original) {
-            $this->flights[$key]['agents'][$itineraryKey][$new] = $itinerary->$original;
+        return [
+            $this->saveImages($this->get('Agents'), $this->saveAgentImages),
+            $this->saveImages($this->get('Carriers')),
+            $this->get('Legs')
+        ];
+    }
+
+    /**
+     * @param bool $onlyFirstAgentPerItinerary
+     */
+    private function addItineraries($onlyFirstAgentPerItinerary)
+    {
+        foreach ($this->data->Itineraries as $key => $itinerary) {
+            foreach (['OutboundLegId', 'InboundLegId'] as $leg) {
+                if (isset($itinerary->$leg)) {
+                    $this->flights[$key][$leg] = $itinerary->$leg;
+                }
+            }
+            foreach ($itinerary->PricingOptions as $itineraryKey => $agent) {
+                $this->flights[$key]['Agents'][$itineraryKey] = $agent;
+                if ($onlyFirstAgentPerItinerary) {
+                    break;
+                }
+            }
+            if (isset($itinerary->BookingDetailsLink)) {
+                $this->flights[$key]['BookingDetailsLink'] = $itinerary->BookingDetailsLink;
+            }
         }
     }
 
     /**
-     * @param       $data
-     * @param array $legs
+     * Initialize and store data
      *
-     * @return array
+     * @return bool
      */
-    private function getLegs($data, $legs = [])
+    private function init()
     {
-        foreach ($data->Legs as $legKey => $leg) {
-            foreach ($this->legVariables as $key => $variable) {
-                $legs[$legKey][$key] = $leg->$variable;
-            }
-            foreach ($leg->FlightNumbers as $singleLegKey => $singleLeg) {
-                $legs[$legKey]['flight_numbers'][$singleLegKey]['flight_number'] = $singleLeg->FlightNumber;
-                $legs[$legKey]['flight_numbers'][$singleLegKey]['carrier_id'] = $singleLeg->CarrierId;
-            }
-        }
-        return $legs;
+        $this->flights = [];
+        $this->get();
+        return !empty($this->data->Itineraries);
     }
 
     /**
      * @param       $objects
-     * @param       $variables
      * @param bool  $saveCarrierImage
-     * @param array $results
      *
      * @return array
      */
-    private function getCarriersOrAgents($objects, $variables, $saveCarrierImage = false, $results = [])
+    private function saveImages($objects, $saveCarrierImage = false)
     {
-        foreach ($objects as $resultKey => $result) {
-            foreach ($variables as $key => $variable) {
-                if (isset($result->$variable)) {
-                    $results[$resultKey][$key] = $result->$variable;
-                }
+        if ($saveCarrierImage === true) {
+            foreach ($objects as &$object) {
+                $object->ImageUrl = $this->saveImage($object->ImageUrl, $this->savePath);
             }
-            $results[$resultKey]['image_path'] = $saveCarrierImage ?
-                $this->saveImage($result->ImageUrl, $this->savePath) :
-                $result->ImageUrl;
         }
-        return $results;
+        return $objects;
     }
 
     /**
      * Assign flight specific agents, carriers and legs to the each
      *
-     * @param $agents
-     * @param $carriers
-     * @param $legs
+     * @param bool $onlyFirstAgentPerItinerary
      */
-    private function beautifyFlights($agents, $carriers, $legs)
+    private function beautifyFlights($onlyFirstAgentPerItinerary)
     {
-        foreach ($this->flights as $flightKey => $flight) {
-            foreach ($flight['agents'] as $key => $agent) {
-                $agent = $agents[$this->arraySearch($agent['detail'][0], $agents, 'id')];
-                foreach (array_keys($this->agentVariables) as $agentKey) {
-                    $this->flights[$flightKey]['agents'][$key][$agentKey] = $agent[$agentKey];
-                }
-                unset($this->flights[$flightKey]['agents'][$key]['detail']);
-            }
-            foreach (['outbound_leg' => 'outbound_leg_id', 'inbound_leg' => 'inbound_leg_id'] as $key => $search) {
-                if (isset($this->flights[$flightKey][$search])) {
-                    $legId = $this->arraySearch($this->flights[$flightKey][$search], $legs, 'id');
-                    foreach ($legs[$legId]['flight_numbers'] as $order => $leg_information) {
-                        $carrierId = $this->arraySearch($leg_information['carrier_id'], $carriers, 'id');
-                        $flightCode = $carriers[$carrierId]['code'] .
-                                      $legs[$legId]['flight_numbers'][$order]['flight_number'];
-                        $legs[$legId]['flight_numbers'][$order]['flight_code'] = $flightCode;
-                        $legs[$legId]['flight_numbers'][$order]['carrier'] = $carriers[$carrierId];
-                    }
-                    $this->flights[$flightKey][$key] = $legs[$legId];
-                }
-            }
-        }
-    }
-
-    /**
-     * Remove duplicated id variables that were used to find legs and carriers
-     */
-    private function cleanVariables()
-    {
+        list($agents, $carriers, $legs) = $this->getMeta();
         foreach ($this->flights as &$flight) {
-            foreach (['outbound_leg_id', 'inbound_leg_id'] as $unset) {
-                if (isset($flight[$unset])) {
-                    unset($flight[$unset]);
+            // Find and assign each agent by ID
+            foreach ($flight['Agents'] as $key => &$flightAgent) {
+                $agent = $agents[$this->arraySearch($flightAgent->Agents[0], $agents, 'Id')];
+                foreach ($agent as $property => $propertyValue) {
+                    $flightAgent->$property = $propertyValue;
                 }
+                unset($flight['Agents'][$key]->Agents);
             }
-            foreach (['outbound_leg', 'inbound_leg'] as $unset) {
-                if (isset($flight[$unset])) {
-                    foreach ($flight[$unset]['flight_numbers'] as $flight_number => &$information) {
-                        unset($information['carrier_id']);
+            // Find and assign outbound and inbound legs
+            foreach (['OutboundLeg' => 'OutboundLegId', 'InboundLeg' => 'InboundLegId'] as $key => $search) {
+                if (isset($flight[$search])) {
+                    $legId = $this->arraySearch($flight[$search], $legs, 'Id');
+                    foreach ($legs[$legId]->FlightNumbers as $order => $legInformation) {
+                        $carrierId = $this->arraySearch($legInformation->CarrierId, $carriers, 'Id');
+                        $flightNumber = $legs[$legId]->FlightNumbers[$order]->FlightNumber;
+                        $flightCode = $carriers[$carrierId]->Code . $flightNumber;
+                        $legs[$legId]->FlightNumbers[$order]->FlightCode = $flightCode;
+                        $legs[$legId]->FlightNumbers[$order]->Carrier = $carriers[$carrierId];
+                    }
+                    if ($this->removeIds === true) {
+                        unset($flight[$search]);
                     }
                 }
             }
-            if (count($flight['agents']) === 1) {
-                $flight['agent'] = $flight['agents'][0];
-                unset($flight['agents']);
+            $flight['Agent'] = $flight['Agents'][0];
+            if ($onlyFirstAgentPerItinerary === true) {
+                unset($flight['Agents']);
             }
         }
-    }
-
-    /**
-     * @return string
-     */
-    protected function getLocation()
-    {
-        return $this->getResponseHeader('Location');
     }
 
     /**
@@ -501,17 +392,16 @@ class LivePricing extends BaseRequest
     protected function getSpecificSessionParameters()
     {
         return $this->filterArray([
-            'adults'                  => $this->adults,
-            'cabinclass'              => $this->cabinclass,
-            'children'                => $this->children,
-            'destinationplace'        => $this->destinationplace,
-            'groupPricing'            => $this->groupPricing,
-            'inbounddate'             => $this->inbounddate,
-            'infants'                 => $this->infants,
-            'locationschema'          => $this->locationschema,
-            'originplace'             => $this->originplace,
-            'outbounddate'            => !empty($this->outbounddate) ? $this->outbounddate
-                                                                     : date('Y-m-d', strtotime('+1 week')),
+            'adults'           => $this->adults,
+            'cabinclass'       => $this->cabinclass,
+            'children'         => $this->children,
+            'destinationplace' => $this->destinationplace,
+            'groupPricing'     => $this->groupPricing,
+            'inbounddate'      => $this->inbounddate,
+            'infants'          => $this->infants,
+            'locationschema'   => $this->locationschema,
+            'originplace'      => $this->originplace,
+            'outbounddate'     => !empty($this->outbounddate) ? $this->outbounddate : date('Y-m-d', strtotime('+1 week'))
         ]);
     }
 

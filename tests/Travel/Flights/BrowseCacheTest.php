@@ -2,7 +2,7 @@
 
 namespace OzdemirBurak\SkyScanner\Tests\Travel\Flights;
 
-use Exception;
+use OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException;
 use OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache;
 
 class BrowseCacheTest extends \PHPUnit_Framework_TestCase
@@ -15,7 +15,7 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
         $date = date('Y-m-d', strtotime('+1 week'));
         $parameters = ['originPlace' => 'LHR', 'destinationPlace' => 'JFK', 'outboundPartialDate' => $date];
         $url = 'http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/JFK/' . $date . '/';
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters($parameters);
         $this->assertEquals($cache->getUrl(), $url);
     }
@@ -23,45 +23,32 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     /**
      * @group browse-cache-methods
      */
-    public function testRequestWithoutApiKey()
-    {
-        $cache = new BrowseCache();
-        $cache->makeRequest('GET', $cache->getUrl());
-        $this->assertEquals(403, $cache->getResponseStatus());
-    }
-
-    /**
-     * @group browse-cache-methods
-     */
-    public function testWithApiKey()
-    {
-        $cache = new BrowseCache(API_KEY);
-        $cache->makeRequest('GET', $cache->getUrl());
-        $this->assertEquals(200, $cache->getResponseStatus());
-    }
-
-    /**
-     * @group browse-cache-methods
-     */
     public function testInvalidMethod()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
+        $cache->setParameters(['method' => 'https://youtu.be/dQw4w9WgXcQ']);
         try {
-            $cache->getData('Françoise Hardy');
-        } catch (Exception $e) {
+            $cache->getPrices();
+        } catch (InvalidMethodException $e) {
             return $this->assertEquals($e->getMessage(), 'Invalid Browse Cache method');
         }
         $this->fail('Exception has not been raised.');
     }
 
     /**
-     * @group browse-cache-methods
+     * @group browse-cache-raw-data
      */
-    public function testResponseContentType()
+    public function testRawDataProperties()
     {
-        $cache = new BrowseCache(API_KEY);
-        $cache->getData();
+        $cache = $this->getBrowseCache();
+        $data = $cache->getPrices();
+        $this->assertEquals(200, $cache->getResponseStatus());
         $this->assertEquals('application/json', $cache->getResponseHeader('Content-Type'));
+        $this->assertNotEmpty($data);
+        foreach (['Quotes', 'Carriers', 'Currencies', 'Places'] as $property) {
+            $data = $cache->get($property);
+            $this->assertNotEmpty($data);
+        }
     }
 
     /**
@@ -69,9 +56,9 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testQuotesOneWay()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters(['outboundPartialDate' => date('Y-m', strtotime('+1 month'))]);
-        $this->assertNotEmpty($cache->getData('browsequotes')['quotes']);
+        $this->assertNotEmpty($cache->getPrices()['Quotes']);
     }
 
     /**
@@ -79,12 +66,12 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testQuotesRound()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
             'outboundPartialDate'  => date('Y-m-d', strtotime('+1 month')),
             'inboundPartialDate'   => date('Y-m-d', strtotime('+1 month'))
         ]);
-        $this->assertNotEmpty($cache->getData('browsequotes')['quotes']);
+        $this->assertNotEmpty($cache->getPrices()['Quotes']);
     }
 
     /**
@@ -92,13 +79,14 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoutesOneWay()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
             'originPlace' => 'IST',
             'destinationPlace' => 'anywhere',
-            'outboundPartialDate' => 'anytime'
+            'outboundPartialDate' => 'anytime',
+            'method' => 'browseroutes'
         ]);
-        $this->assertNotEmpty($cache->getData('browseroutes')['routes']);
+        $this->assertNotEmpty($cache->getPrices()['Routes']);
     }
 
     /**
@@ -106,14 +94,15 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testRoutesRound()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
             'originPlace' => 'IST',
             'destinationPlace' => 'anywhere',
             'outboundPartialDate' => 'anytime',
-            'inboundPartialDate' => 'anytime'
+            'inboundPartialDate' => 'anytime',
+            'method' => 'browseroutes'
         ]);
-        $this->assertNotEmpty($cache->getData('browseroutes')['routes']);
+        $this->assertNotEmpty($cache->getPrices()['Routes']);
     }
 
     /**
@@ -121,11 +110,12 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testDatesOneWay()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
-            'outboundPartialDate' => date('Y-m', strtotime('+1 month'))
+            'outboundPartialDate' => date('Y-m', strtotime('+1 month')),
+            'method'              => 'browsedates'
         ]);
-        $this->assertNotEmpty($cache->getData('browsedates')['dates']);
+        $this->assertNotEmpty($cache->getPrices()['Dates']);
     }
 
     /**
@@ -133,12 +123,13 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testDatesRound()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
             'outboundPartialDate'  => date('Y-m', strtotime('+1 month')),
-            'inboundPartialDate'   => date('Y-m', strtotime('+2 month'))
+            'inboundPartialDate'   => date('Y-m', strtotime('+2 month')),
+            'method'               => 'browsedates'
         ]);
-        $this->assertNotEmpty($cache->getData('browsedates')['dates']);
+        $this->assertNotEmpty($cache->getPrices()['Dates']);
     }
 
     /**
@@ -146,11 +137,12 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testGridOneWay()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
-            'outboundPartialDate' => date('Y-m', strtotime('+1 month'))
+            'outboundPartialDate' => date('Y-m', strtotime('+1 month')),
+            'method'              => 'browsegrid'
         ]);
-        $this->assertNotEmpty($cache->getData('browsegrid')['grid']);
+        $this->assertNotEmpty($cache->getPrices()['Grid']);
     }
 
     /**
@@ -158,11 +150,20 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
      */
     public function testGridRound()
     {
-        $cache = new BrowseCache(API_KEY);
+        $cache = $this->getBrowseCache();
         $cache->setParameters([
             'outboundPartialDate'  => date('Y-m', strtotime('+1 month')),
-            'inboundPartialDate'   => date('Y-m', strtotime('+2 month'))
+            'inboundPartialDate'   => date('Y-m', strtotime('+2 month')),
+            'method'               => 'browsegrid'
         ]);
-        $this->assertNotEmpty($cache->getData('browsegrid')['grid']);
+        $this->assertNotEmpty($cache->getPrices()['Grid']);
+    }
+
+    /**
+     * @return \OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache
+     */
+    private function getBrowseCache()
+    {
+        return new BrowseCache(API_KEY);
     }
 }

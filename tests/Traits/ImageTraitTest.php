@@ -13,8 +13,8 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidRemoteImageNotSaved()
     {
-        $this->saveImage("http://www.qwertyasdfgzxcv.com/dummy.jpg", "/tmp/images/");
-        $this->assertFileNotExists("/tmp/images/dummy.jpg");
+        $this->saveImage('http://www.qwertyasdfgzxcv.com/dummy.jpg', '/tmp/images/');
+        $this->assertFileNotExists('/tmp/images/dummy.jpg');
     }
 
     /**
@@ -22,7 +22,7 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testImagePathIsReturnedFromInvalidRemoteImage()
     {
-        $image = $this->saveImage("http://www.qwertyasdfgzxcv.com/dummy.jpg", "/tmp/images/");
+        $image = $this->saveImage('http://www.qwertyasdfgzxcv.com/dummy.jpg', '/tmp/images/');
         $this->assertEmpty($image);
     }
 
@@ -31,8 +31,8 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testValidRemoteImageIsSaved()
     {
-        $this->saveImage("https://upload.wikimedia.org/wikipedia/commons/a/af/Oludeniz.jpg", "/tmp/images/");
-        $this->assertFileExists("/tmp/images/Oludeniz.jpg");
+        $this->saveImage('https://upload.wikimedia.org/wikipedia/commons/a/af/Oludeniz.jpg', '/tmp/images/');
+        $this->assertFileExists('/tmp/images/Oludeniz.jpg');
     }
 
     /**
@@ -40,7 +40,7 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testImagePathIsReturnedFromValidRemoteImage()
     {
-        $image = $this->saveImage("https://upload.wikimedia.org/wikipedia/commons/a/af/Oludeniz.jpg", "/tmp/images/");
-        $this->assertEquals("/tmp/images/Oludeniz.jpg", $image);
+        $image = $this->saveImage('https://upload.wikimedia.org/wikipedia/commons/a/af/Oludeniz.jpg', '/tmp/images/');
+        $this->assertEquals('/tmp/images/Oludeniz.jpg', $image);
     }
 }
