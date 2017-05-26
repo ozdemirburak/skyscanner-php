@@ -11,6 +11,14 @@ class ImageTraitTest extends \PHPUnit_Framework_TestCase
     /**
      * @group invalid-image
      */
+    public function testInvalidImage()
+    {
+        $this->assertEmpty($this->saveImage('image.jpg', '/tmp/images/'));
+    }
+
+    /**
+     * @group invalid-image
+     */
     public function testInvalidRemoteImageNotSaved()
     {
         $this->saveImage('http://www.qwertyasdfgzxcv.com/dummy.jpg', '/tmp/images/');
