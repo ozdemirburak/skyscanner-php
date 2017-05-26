@@ -8,7 +8,9 @@
 This is an unofficial PHP SDK for the [Skyscanner's API](https://skyscanner.github.io/slate/)
 to support Flights, Car Hire, Localisation and Places services.
 
-Currently, only the Places service is not implemented.
+Currently, all of the services are implemented and tested.
+
+Note: Hotels service is missing, because it is currently unavailable.
 
 ## Install
 
@@ -97,6 +99,19 @@ use OzdemirBurak\SkyScanner\Localisation\Market;
 $market = new Market($apiKey = 'your-api-key', $locale = 'en-GB'));
 $countries = $market->get();
 ```
+
+### Places
+
+``` php
+use OzdemirBurak\SkyScanner\PlacesService;
+
+$places = new PlacesService($apiKey = 'your-api-key');
+$geoCatalog = $places->get();
+$list = $places->getList('UK', 'GBP', 'en-GB', 'istanbul');
+$information = $places->getInformation('UK', 'GBP', 'en-GB', 'CDG-sky');
+$hotels = $places->getHotels('UK', 'EUR', 'en-GB', 'paris');
+```
+
 
 ## Change log
 
