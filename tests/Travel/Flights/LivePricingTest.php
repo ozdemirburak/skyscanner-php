@@ -28,11 +28,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
         $data = $pricing->get();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
-        $this->assertEquals('application/json', $pricing->getResponseHeader('Content-Type'));
-        $this->assertNotEmpty($data);
-        foreach (['Agents', 'Carriers', 'Currencies', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'] as $property) {
-            $data = $pricing->get($property);
+        if ($status !== 304) {
             $this->assertNotEmpty($data);
+            foreach (['Agents', 'Carriers', 'Currencies', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'] as $property) {
+                $data = $pricing->get($property);
+                $this->assertNotEmpty($data);
+            }
         }
         $this->assertEquals($pricing->get('Query')->Country, $pricing->getParameter('country'));
     }
@@ -43,9 +44,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testOneWayDirect()
     {
         $pricing = $this->getLivePricing();
-        $pricing->getFlights();
+        $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
+            $this->assertNotEmpty($flights);
+        }
     }
 
     /**
@@ -55,9 +59,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['stops' => 1]);
-        $pricing->getFlights();
+        $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
+            $this->assertNotEmpty($flights);
+        }
     }
 
     /**
@@ -67,9 +74,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $pricing->getFlights();
+        $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
+            $this->assertNotEmpty($flights);
+        }
     }
 
     /**
@@ -79,9 +89,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['stops' => 1, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $pricing->getFlights();
+        $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
+            $this->assertNotEmpty($flights);
+        }
     }
 
     /**
