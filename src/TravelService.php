@@ -356,20 +356,6 @@ abstract class TravelService
     }
 
     /**
-     * @param $url
-     *
-     * @return string
-     */
-    protected function getPollingQueryUrl($url)
-    {
-        $url .= '?apiKey=' . $this->getParameter('apiKey');
-        if (!empty($parameters = $this->getOptionalPollingParameters())) {
-            $url .= '&' . http_build_query($parameters);
-        }
-        return $url;
-    }
-
-    /**
      * Get the X-Forwarded-For
      *
      * @return string

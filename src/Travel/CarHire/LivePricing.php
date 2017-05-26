@@ -87,7 +87,7 @@ class LivePricing extends TravelService
         $this->url .= 'carhire/liveprices/v2/';
         $uri = '{country}/{currency}/{locale}/{pickupplace}/{dropoffplace}/{pickupdatetime}/{dropoffdatetime}/{driverage}';
         $url = $this->url . $this->replaceParameters($uri);
-        $url = $this->url . $this->getSessionKey($this->getPollingQueryUrl($url), 'GET');
+        $url = $this->url . $this->getSessionKey($url, 'GET');
         return $url;
     }
 
