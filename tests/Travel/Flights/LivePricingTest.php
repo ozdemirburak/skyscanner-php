@@ -26,7 +26,8 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $data = $pricing->get();
-        $this->assertEquals(200, $pricing->getResponseStatus());
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
         $this->assertEquals('application/json', $pricing->getResponseHeader('Content-Type'));
         $this->assertNotEmpty($data);
         foreach (['Agents', 'Carriers', 'Currencies', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'] as $property) {
@@ -42,7 +43,9 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testOneWayDirect()
     {
         $pricing = $this->getLivePricing();
-        $this->assertNotEmpty($pricing->getFlights());
+        $pricing->getFlights();
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
     }
 
     /**
@@ -52,7 +55,9 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['stops' => 1]);
-        $this->assertNotEmpty($pricing->getFlights());
+        $pricing->getFlights();
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
     }
 
     /**
@@ -62,7 +67,9 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $this->assertNotEmpty($pricing->getFlights());
+        $pricing->getFlights();
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
     }
 
     /**
@@ -72,7 +79,9 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $pricing->setParameters(['stops' => 1, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
-        $this->assertNotEmpty($pricing->getFlights());
+        $pricing->getFlights();
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
     }
 
     /**
