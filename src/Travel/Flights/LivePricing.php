@@ -374,6 +374,7 @@ class LivePricing extends TravelService
                         $legs[$legId]->FlightNumbers[$order]->FlightCode = $flightCode;
                         $legs[$legId]->FlightNumbers[$order]->Carrier = $carriers[$carrierId];
                     }
+                    $flight[$key] = $legs[$legId];
                     if ($this->removeIds === true) {
                         unset($flight[$search]);
                     }
