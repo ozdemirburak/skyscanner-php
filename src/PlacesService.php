@@ -12,7 +12,7 @@ class PlacesService
     /**
      * LocalisationService constructor.
      *
-     * @param $apiKey
+     * @param string $apiKey
      */
     public function __construct($apiKey = '')
     {
@@ -40,10 +40,10 @@ class PlacesService
     /**
      * Get a list of places that match a query string.
      *
-     * @param $country
-     * @param $currency
-     * @param $locale
-     * @param $query
+     * @param string $country
+     * @param string $currency
+     * @param string $locale
+     * @param string $query
      *
      * @return mixed
      */
@@ -57,10 +57,10 @@ class PlacesService
     /**
      * Get information about a country, city or airport using its ID.
      *
-     * @param $market
-     * @param $currency
-     * @param $locale
-     * @param $id
+     * @param string $market
+     * @param string $currency
+     * @param string $locale
+     * @param string $id
      *
      * @return mixed
      */
@@ -75,16 +75,27 @@ class PlacesService
      * Retrieve a list of hotels and/or geographical locations which can then be used with the hotels and car hire APIs.
      * In the case of car hire, use this if you want downtown (non-airport) searches.
      *
-     * @param $country
-     * @param $currency
-     * @param $locale
-     * @param $query
+     * @param string $country
+     * @param string $currency
+     * @param string $locale
+     * @param string $query
+     * @param bool   $removeIds
      *
      * @return mixed
      */
-    public function getHotels($country, $currency, $locale, $query)
+    public function getHotels($country, $currency, $locale, $query, $removeIds = true)
     {
         $url = implode('/', [$this->url, 'hotels', 'autosuggest', 'v2', $country, $currency, $locale, $query]);
-        return $this->request($url);
+        $data = $this->request($url);
+        if (!empty($data->results)) {
+            foreach ($data->results as &$result) {
+                $id = array_search($result->parent_place_id, array_column($data->places, 'place_id'), true);
+                $result->parent_place = $data->places[$id];
+                if ($removeIds === true) {
+                    unset($result->parent_place_id);
+                }
+            }
+        }
+        return $data;
     }
 }
