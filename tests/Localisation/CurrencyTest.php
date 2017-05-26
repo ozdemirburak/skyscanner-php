@@ -11,7 +11,7 @@ class CurrencyTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithoutApiKey()
     {
-        $this->assertEmpty((new Currency(null))->fetch());
+        $this->assertEmpty((new Currency(null))->get());
     }
 
     /**
@@ -19,6 +19,6 @@ class CurrencyTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithApiKey()
     {
-        $this->assertNotEmpty((new Currency(API_KEY))->fetch());
+        $this->assertNotEmpty((new Currency(API_KEY))->get());
     }
 }

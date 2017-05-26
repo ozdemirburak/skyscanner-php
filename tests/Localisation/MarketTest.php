@@ -11,7 +11,7 @@ class MarketTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithoutApiKey()
     {
-        $this->assertEmpty((new Market(null))->fetch());
+        $this->assertEmpty((new Market(null))->get());
     }
 
     /**
@@ -19,6 +19,6 @@ class MarketTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithApiKey()
     {
-        $this->assertNotEmpty((new Market(API_KEY))->fetch());
+        $this->assertNotEmpty((new Market(API_KEY))->get());
     }
 }

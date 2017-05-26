@@ -5,7 +5,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-This is an unofficial PHP SDK for the [Skyscanner's API](http://business.skyscanner.net/portal/en-GB/Documentation/ApiOverview)
+This is an unofficial PHP SDK for the [Skyscanner's API](https://skyscanner.github.io/slate/)
 to support Flights, Car Hire, Localisation and Places services.
 
 Currently, only the Places service is not implemented.
@@ -77,7 +77,7 @@ $cars = $pricing->getCars();
 use OzdemirBurak\SkyScanner\Localisation\Currency;
 
 $currency = new Currency($apiKey = 'your-api-key');
-$currencies = $currency->fetch();
+$currencies = $currency->get();
 ```
     
 ### Localisation: Locale
@@ -86,7 +86,7 @@ $currencies = $currency->fetch();
 use OzdemirBurak\SkyScanner\Localisation\Locale;
 
 $locale = new Locale($apiKey = 'your-api-key');
-$locales = $locale->fetch();
+$locales = $locale->get();
 ```
     
 ### Localisation: Market
@@ -95,7 +95,7 @@ $locales = $locale->fetch();
 use OzdemirBurak\SkyScanner\Localisation\Market;
 
 $market = new Market($apiKey = 'your-api-key', $locale = 'en-GB'));
-$countries = $market->fetch();
+$countries = $market->get();
 ```
 
 ## Change log
