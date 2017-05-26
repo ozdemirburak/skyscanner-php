@@ -68,8 +68,8 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
     {
         $cache = $this->getBrowseCache();
         $cache->setParameters([
-            'outboundPartialDate'  => date('Y-m-d', strtotime('+1 month')),
-            'inboundPartialDate'   => date('Y-m-d', strtotime('+1 month'))
+            'outboundPartialDate'  => date('Y-m', strtotime('+1 month')),
+            'inboundPartialDate'   => date('Y-m', strtotime('+1 month'))
         ]);
         $this->assertNotEmpty($cache->getPrices()['Quotes']);
     }
