@@ -26,11 +26,14 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     {
         $pricing = $this->getLivePricing();
         $data = $pricing->get();
-        $this->assertEquals(200, $pricing->getResponseStatus());
-        $this->assertNotEmpty($data);
-        foreach (['submitted_query', 'cars', 'websites', 'images', 'car_classes', 'debug_items'] as $property) {
-            $data = $pricing->get($property);
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
             $this->assertNotEmpty($data);
+            foreach (['submitted_query', 'cars', 'websites', 'images', 'car_classes', 'debug_items'] as $property) {
+                $data = $pricing->get($property);
+                $this->assertNotEmpty($data);
+            }
         }
     }
 
@@ -40,7 +43,12 @@ class LivePricingTest extends \PHPUnit_Framework_TestCase
     public function testWithApiKey()
     {
         $pricing = $this->getLivePricing();
-        $this->assertNotEmpty($pricing->getCars());
+        $cars = $pricing->getCars();
+        $status = $pricing->getResponseStatus();
+        $this->assertContains($status, [200, 304]);
+        if ($status !== 304) {
+            $this->assertNotEmpty($cars);
+        }
     }
 
     /**

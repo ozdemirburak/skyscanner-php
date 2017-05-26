@@ -43,7 +43,7 @@ class LivePricing extends TravelService
      *
      * @var string
      */
-    protected $dropoffplace = 'ADB';
+    protected $dropoffplace = 'MAN';
 
     /**
      * Date and time for pickup
@@ -63,7 +63,7 @@ class LivePricing extends TravelService
      *
      * @var string
      */
-    protected $pickupplace = 'IST';
+    protected $pickupplace = 'LHR';
 
     /**
      * Save remote car images to local where urls are returned from the request
