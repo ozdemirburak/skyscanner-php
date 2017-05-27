@@ -104,15 +104,6 @@ trait ConsoleTrait
     }
 
     /**
-     * @param $data
-     */
-    public function dd($data)
-    {
-        dump($data);
-        exit();
-    }
-
-    /**
      * @param bool $force
      *
      * @return bool
