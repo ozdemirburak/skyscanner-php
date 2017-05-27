@@ -112,7 +112,6 @@ $information = $places->getInformation('UK', 'GBP', 'en-GB', 'CDG-sky');
 $hotels = $places->getHotels('UK', 'EUR', 'en-GB', 'paris');
 ```
 
-
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
