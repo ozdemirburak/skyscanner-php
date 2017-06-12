@@ -60,11 +60,11 @@ abstract class TravelService
     protected $locale = 'en-GB';
 
     /**
-     * Keep or remove IDs after being used
+     * Keep or remove IDs after being used to find the given relations such as Carrier Information
      *
      * @var bool
      */
-    protected $removeIds = true;
+    protected $removeIds = false;
 
     /**
      * @var \Psr\Http\Message\ResponseInterface
