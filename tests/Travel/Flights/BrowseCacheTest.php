@@ -30,7 +30,8 @@ class BrowseCacheTest extends \PHPUnit_Framework_TestCase
         try {
             $cache->getPrices();
         } catch (InvalidMethodException $e) {
-            return $this->assertEquals($e->getMessage(), 'Invalid Browse Cache method');
+            $this->assertEquals($e->getMessage(), 'Invalid Browse Cache method');
+            return;
         }
         $this->fail('Exception has not been raised.');
     }

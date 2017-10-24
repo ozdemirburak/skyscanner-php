@@ -229,7 +229,7 @@ class LivePricing extends TravelService
      *
      * Supported values are: 0, 1
      *
-     * @var string
+     * @var int
      */
     protected $stops = 0;
 
