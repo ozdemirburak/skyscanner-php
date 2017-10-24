@@ -15,7 +15,8 @@ class PlacesTest extends \PHPUnit_Framework_TestCase
         try {
             $this->getPlaces()->get();
         } catch (RestrictedMethodException $e) {
-            return $this->assertContains('permission', $e->getMessage());
+            $this->assertContains('permission', $e->getMessage());
+            return;
         }
         $this->fail('Exception has not been raised.');
     }
