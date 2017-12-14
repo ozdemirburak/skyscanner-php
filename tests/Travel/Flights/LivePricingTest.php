@@ -35,8 +35,8 @@ class LivePricingTest extends TestCase
                 $data = $pricing->get($property);
                 $this->assertNotEmpty($data);
             }
+            $this->assertEquals($pricing->get('Query')->Country, $pricing->getParameter('country'));
         }
-        $this->assertEquals($pricing->get('Query')->Country, $pricing->getParameter('country'));
     }
 
     /**
