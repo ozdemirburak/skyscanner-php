@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Traits;
 
 use OzdemirBurak\SkyScanner\Traits\ConsoleTrait;
+use PHPUnit\Framework\TestCase;
 
-class ConsoleTraitTest extends \PHPUnit_Framework_TestCase
+class ConsoleTraitTest extends TestCase
 {
     use ConsoleTrait;
 

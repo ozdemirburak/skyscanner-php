@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Travel\CarHire;
 
 use OzdemirBurak\SkyScanner\Travel\CarHire\LivePricing;
+use PHPUnit\Framework\TestCase;
 
-class LivePricingTest extends \PHPUnit_Framework_TestCase
+class LivePricingTest extends TestCase
 {
     /**
      * @group cars-live-pricing-methods

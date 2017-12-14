@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Localisation;
 
 use OzdemirBurak\SkyScanner\Localisation\Market;
+use PHPUnit\Framework\TestCase;
 
-class MarketTest extends \PHPUnit_Framework_TestCase
+class MarketTest extends TestCase
 {
     /**
      * @group market-tests

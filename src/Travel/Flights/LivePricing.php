@@ -231,7 +231,7 @@ class LivePricing extends TravelService
      *
      * @var int
      */
-    protected $stops = 0;
+    protected $stops;
 
     /**
      * The property to sort on. If specified, you must also specify sortorder

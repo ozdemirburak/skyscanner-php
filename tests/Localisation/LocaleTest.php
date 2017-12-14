@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Localisation;
 
 use OzdemirBurak\SkyScanner\Localisation\Locale;
+use PHPUnit\Framework\TestCase;
 
-class LocaleTest extends \PHPUnit_Framework_TestCase
+class LocaleTest extends TestCase
 {
     /**
      * @group locale-tests

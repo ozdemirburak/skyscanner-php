@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Localisation;
 
 use OzdemirBurak\SkyScanner\Localisation\Currency;
+use PHPUnit\Framework\TestCase;
 
-class CurrencyTest extends \PHPUnit_Framework_TestCase
+class CurrencyTest extends TestCase
 {
     /**
      * @group currency-tests

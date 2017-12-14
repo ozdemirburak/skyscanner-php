@@ -4,8 +4,9 @@ namespace OzdemirBurak\SkyScanner\Tests;
 
 use OzdemirBurak\SkyScanner\Exceptions\RestrictedMethodException;
 use OzdemirBurak\SkyScanner\PlacesService;
+use PHPUnit\Framework\TestCase;
 
-class PlacesTest extends \PHPUnit_Framework_TestCase
+class PlacesTest extends TestCase
 {
     /**
      * @group places-tests

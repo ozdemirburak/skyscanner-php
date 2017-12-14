@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Traits;
 
 use OzdemirBurak\SkyScanner\Traits\ImageTrait;
+use PHPUnit\Framework\TestCase;
 
-class ImageTraitTest extends \PHPUnit_Framework_TestCase
+class ImageTraitTest extends TestCase
 {
     use ImageTrait;
 

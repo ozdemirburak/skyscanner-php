@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Traits;
 
 use OzdemirBurak\SkyScanner\Traits\ReferralTrait;
+use PHPUnit\Framework\TestCase;
 
-class ReferralTraitTest extends \PHPUnit_Framework_TestCase
+class ReferralTraitTest extends TestCase
 {
     use ReferralTrait;
 

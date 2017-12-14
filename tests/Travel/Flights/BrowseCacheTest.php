@@ -4,8 +4,9 @@ namespace OzdemirBurak\SkyScanner\Tests\Travel\Flights;
 
 use OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException;
 use OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache;
+use PHPUnit\Framework\TestCase;
 
-class BrowseCacheTest extends \PHPUnit_Framework_TestCase
+class BrowseCacheTest extends TestCase
 {
     /**
      * @group browse-cache-methods

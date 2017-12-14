@@ -3,8 +3,9 @@
 namespace OzdemirBurak\SkyScanner\Tests\Travel\Flights;
 
 use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
+use PHPUnit\Framework\TestCase;
 
-class LivePricingTest extends \PHPUnit_Framework_TestCase
+class LivePricingTest extends TestCase
 {
     /**
      * @group flights-live-pricing-methods

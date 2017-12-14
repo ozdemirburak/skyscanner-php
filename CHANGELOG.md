@@ -2,6 +2,9 @@
 
 All Notable changes to `skyscanner-php` will be documented in this file
 
+## 2017-12-14
+- Updated PHPUnit
+
 ## 2017-05-26
 - Major refactoring, not renaming the original object properties returned by the API itself
 - Renamed Flights\LivePrices method name `parseFlights` to `getFlights`
