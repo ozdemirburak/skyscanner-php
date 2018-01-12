@@ -126,10 +126,6 @@ $ composer test
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
 
-## Security
-
-If you discover any security related issues, please email mail@burakozdemir.co.uk instead of using the issue tracker.
-
 ## Credits
 
 - [Burak Özdemir][link-author]
