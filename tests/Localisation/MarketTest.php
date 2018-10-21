@@ -20,6 +20,6 @@ class MarketTest extends TestCase
      */
     public function testWithApiKey()
     {
-        $this->assertNotEmpty((new Market(API_KEY))->get());
+        $this->assertNotEmpty((new Market(API_KEY_1))->get());
     }
 }

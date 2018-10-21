@@ -20,6 +20,6 @@ class CurrencyTest extends TestCase
      */
     public function testWithApiKey()
     {
-        $this->assertNotEmpty((new Currency(API_KEY))->get());
+        $this->assertNotEmpty((new Currency(API_KEY_1))->get());
     }
 }

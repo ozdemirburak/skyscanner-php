@@ -41,7 +41,7 @@ trait ConsoleTrait
      */
     protected function getMessageBackgroundColor($type)
     {
-        if (in_array($type, ['info', 'error', 'comment'], true)) {
+        if (\in_array($type, ['info', 'error', 'comment'], true)) {
             return $this->{$type . 'Color'};
         }
         return $this->defaultColor;
@@ -58,7 +58,7 @@ trait ConsoleTrait
      *
      * @return string
      */
-    public function getMessageWithColor($string, $background = 0, $foreground = 255)
+    public function getMessageWithColor($string, $background = 0, $foreground = 255): string
     {
         return "\033[38;5;{$foreground}m\033[48;5;{$background}m{$string}\033[0m";
     }
@@ -69,7 +69,7 @@ trait ConsoleTrait
      * @param      $joinString
      * @param bool $force
      */
-    public function printSuccessMessage($joinString, $force = true)
+    public function printSuccessMessage($joinString, $force = true): void
     {
         if ($this->isPrintable($force)) {
             $this->printMessage(implode(': ', ['Success', $joinString]), 'info');
@@ -82,7 +82,7 @@ trait ConsoleTrait
      * @param      $joinString
      * @param bool $force
      */
-    public function printErrorMessage($joinString, $force = true)
+    public function printErrorMessage($joinString, $force = true): void
     {
         if ($this->isPrintable($force)) {
             $this->printMessage(implode(': ', ['Failed', $joinString]), 'error');
@@ -96,10 +96,11 @@ trait ConsoleTrait
      * @param string $type
      * @param bool   $force
      */
-    public function printMessage($string, $type = 'comment', $force = true)
+    public function printMessage($string, $type = 'comment', $force = true): void
     {
         if ($this->isPrintable($force)) {
-            print $this->getMessageWithColor($string, $this->getMessageBackgroundColor($type));
+            echo $this->getMessageWithColor($string, $this->getMessageBackgroundColor($type));
+            echo "\n";
         }
     }
 
@@ -108,7 +109,7 @@ trait ConsoleTrait
      *
      * @return bool
      */
-    private function isPrintable($force = true)
+    private function isPrintable($force = true): bool
     {
         return !($force === false && strpos($_SERVER['argv'][0], 'phpunit') !== false);
     }

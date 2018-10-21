@@ -10,6 +10,34 @@ class LivePricing extends TravelService
     use ImageTrait;
 
     /**
+     * API Endpoint
+     *
+     * @var string
+     */
+    protected $endpoint = 'pricing/v1.0/';
+
+    /**
+     * API Uri
+     *
+     * @var string
+     */
+    protected $uri = '{country}/{currency}/{locale}/{locationSchema}/{originPlace}/{destinationPlace}/{outboundDate}/{inboundDate}/{cabinClass}/{adults}/{children}/{infants}/{includeCarriers}/{excludeCarriers}/{groupPricing}?apiKey={apiKey}';
+
+    /**
+     * API Session Polling Uri
+     *
+     * @var string
+     */
+    protected $uriSession = '?sortType={sortType}&sortOrder={sortOrder}&duration={duration}&includeCarriers={includeCarriers}&excludeCarriers={excludeCarriers}&originAirports={originAirports}&destinationAirports={destinationAirports}&stops={stops}&outboundDepartTime={outboundDepartTime}&outboundDepartStartTime={outboundDepartStartTime}&outboundDepartEndTime={outboundDepartEndTime}&outboundArriveStartTime={outboundArriveStartTime}&outboundArriveEndTime={outboundArriveEndTime}&inboundDepartTime={inboundDepartTime}&inboundDepartStartTime={inboundDepartStartTime}&inboundDepartEndTime={inboundDepartEndTime}&inboundArriveStartTime={inboundArriveStartTime}&inboundArriveEndTime={inboundArriveEndTime}&apiKey={apiKey}';
+
+    /**
+     * Main data property that contains pricing information
+     *
+     * @var string
+     */
+    protected $property = 'Itineraries';
+
+    /**
      * The number of adult passengers
      *
      * @var int
@@ -23,16 +51,15 @@ class LivePricing extends TravelService
      *
      * @var string
      */
-    protected $cabinclass = 'Economy';
+    protected $cabinClass = 'Economy';
 
     /**
      * The code schema to use for carriers
-     *
      * Supported values are: Iata, Icao, Skyscanner
      *
      * @var string
      */
-    protected $carrierschema = 'Iata';
+    protected $locationSchema = 'Iata';
 
     /**
      * The number of children passengers
@@ -43,25 +70,22 @@ class LivePricing extends TravelService
 
     /**
      * Destination airports to filter on
-     *
      * List of airport codes delimited by ';'
      *
      * @var string
      */
-    protected $destinationairports;
+    protected $destinationAirports;
 
     /**
      * The destination city or airport
-     *
      * Specified location schema, or Skyscanner Rnid
      *
      * @var string
      */
-    protected $destinationplace = 'IST';
+    protected $destinationPlace;
 
     /**
      * Filter for maximum duration in minutes
-     *
      * Supported values are: Between 0 and 1800
      *
      * @var int
@@ -70,14 +94,12 @@ class LivePricing extends TravelService
 
     /**
      * Filter flights by any but the specified carriers
-     *
      * Must be semicolon-separated Iata carrier codes.
      *
      * @link http://www.iata.org/publications/Pages/code-search.aspx
-     *
      * @var string
      */
-    protected $excludecarriers;
+    protected $excludeCarriers;
 
     /**
      * Flights that are parsed via API call
@@ -95,50 +117,60 @@ class LivePricing extends TravelService
 
     /**
      * The return date
-     *
      * Formatted as YYYY-mm-dd
      *
      * @var string
      */
-    protected $inbounddate;
+    protected $inboundDate;
+
+    /**
+     * Filter for start of range for inbound departure time.
+     * Formatted as hh:mm
+     *
+     * @var string
+     */
+    protected $inboundArriveStartTime;
+
+    /**
+     * Filter for end of range for inbound arrival time.
+     * Formatted as hh:mm
+     *
+     * @var string
+     */
+    protected $inboundArriveEndTime;
 
     /**
      * Filter for end of range for inbound departure time
-     *
      * Formatted as 'hh:mm'
      *
      * @var string
      */
-    protected $inbounddepartendtime;
+    protected $inboundDepartEndTime;
 
     /**
      * Filter for start of range for inbound departure time
-     *
      * Formatted as 'hh:mm'
      *
      * @var string
      */
-    protected $inbounddepartstarttime;
+    protected $inboundDepartStartTime;
 
     /**
      * Filter for inbound departure time by time period of the day (i.e. morning, afternoon, evening)
-     *
      * List of day time period delimited by ';' (acceptable values are M, A, E)
      *
      * @var string
      */
-    protected $inbounddeparttime;
+    protected $inboundDepartTime;
 
     /**
      * Filter flights by the specified carriers
-     *
      * Must be semicolon-separated Iata carrier codes.
      *
      * @link http://www.iata.org/publications/Pages/code-search.aspx
-     *
      * @var string
      */
-    protected $includecarriers;
+    protected $includeCarriers;
 
     /**
      * The number of infant passengers
@@ -149,7 +181,6 @@ class LivePricing extends TravelService
 
     /**
      ** The code schema used for locations
-     *
      * Supported values are: Iata, GeoNameCode, GeoNameId, Rnid, Sky
      *
      * @var string
@@ -158,39 +189,51 @@ class LivePricing extends TravelService
 
     /**
      * Origin airports to filter on
-     *
      * List of airport codes delimited by ';'
      *
      * @var string
      */
-    protected $originairports;
+    protected $originAirports;
 
     /**
      * The origin city or airport
-     *
      * Specified location schema, or Skyscanner Rnid
      *
      * @var string
      */
-    protected $originplace = 'LHR';
+    protected $originPlace;
 
     /**
      * The departure date
-     *
      * Formatted as YYYY-mm-dd
      *
      * @var string
      */
-    protected $outbounddate;
+    protected $outboundDate;
+
+    /**
+     * Filter for start of range for outbound departure time.
+     * Formatted as hh:mm
+     *
+     * @var string
+     */
+    protected $outboundArriveStartTime;
+
+    /**
+     * Filter for end of range for outbound arrival time.
+     * Formatted as hh:mm
+     *
+     * @var string
+     */
+    protected $outboundArriveEndTime;
 
     /**
      * Filter for end of range for outbound departure time
-     *
      * Formatted as 'hh:mm'
      *
      * @var string
      */
-    protected $outbounddepartendtime;
+    protected $outboundDepartEndTime;
 
     /**
      * Filter for start of range for outbound departure time
@@ -199,16 +242,15 @@ class LivePricing extends TravelService
      *
      * @var string
      */
-    protected $outbounddepartstarttime;
+    protected $outboundDepartStartTime;
 
     /**
      * Filter for outbound departure time by time period of the day (i.e. morning, afternoon, evening)
-     *
      * List of day time period delimited by ';' (acceptable values are M, A, E)
      *
      * @var string
      */
-    protected $outbounddeparttime;
+    protected $outboundDepartTime;
 
     /**
      * Save remote agent images to local where urls are returned from the request
@@ -235,13 +277,12 @@ class LivePricing extends TravelService
 
     /**
      * The property to sort on. If specified, you must also specify sortorder
-     *
-     * Supported values are: carrier, duration, outboundarrivetime, outbounddeparttime, inboundarrivetime,
-     *                       inbounddeparttime, price
+     * Supported values are: carrier, duration, outboundarrivetime, outbounddeparttime,
+     * inboundarrivetime, inbounddeparttime, price
      *
      * @var string
      */
-    protected $sorttype = 'price';
+    protected $sortType = 'price';
 
     /**
      * Sort direction
@@ -250,17 +291,18 @@ class LivePricing extends TravelService
      *
      * @var string
      */
-    protected $sortorder = 'asc';
+    protected $sortOrder = 'asc';
 
     /**
      * Full URL
      *
      * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getUrl()
+    public function getUrl(): string
     {
-        $url = $this->url . 'pricing/v1.0/';
-        return $url . $this->getSessionKey($url);
+        [$id, $this->uri] = [$this->getSessionId($this->url . $this->endpoint), $this->uriSession];
+        return $this->url . $this->endpoint . $id;
     }
 
     /**
@@ -271,10 +313,12 @@ class LivePricing extends TravelService
      * @param bool $onlyFirstAgentPerItinerary
      *
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getFlights($onlyFirstAgentPerItinerary = true)
+    public function getFlights($onlyFirstAgentPerItinerary = true): array
     {
         if ($this->init()) {
+            $this->flights = [];
             $this->addItineraries($onlyFirstAgentPerItinerary);
             $this->beautifyFlights($onlyFirstAgentPerItinerary);
         } else {
@@ -285,8 +329,9 @@ class LivePricing extends TravelService
 
     /**
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getMeta()
+    public function getMeta(): array
     {
         return [
             $this->saveImages($this->get('Agents'), $this->saveAgentImages),
@@ -296,9 +341,9 @@ class LivePricing extends TravelService
     }
 
     /**
-     * @param bool $onlyFirstAgentPerItinerary
+     * @param $onlyFirstAgentPerItinerary
      */
-    private function addItineraries($onlyFirstAgentPerItinerary)
+    private function addItineraries($onlyFirstAgentPerItinerary): void
     {
         foreach ($this->data->Itineraries as $key => $itinerary) {
             foreach (['OutboundLegId', 'InboundLegId'] as $leg) {
@@ -319,22 +364,10 @@ class LivePricing extends TravelService
     }
 
     /**
-     * Initialize and store data
+     * @param      $objects
+     * @param bool $saveCarrierImage
      *
-     * @return bool
-     */
-    private function init()
-    {
-        $this->flights = [];
-        $this->get();
-        return !empty($this->data->Itineraries);
-    }
-
-    /**
-     * @param       $objects
-     * @param bool  $saveCarrierImage
-     *
-     * @return array
+     * @return mixed
      */
     private function saveImages($objects, $saveCarrierImage = false)
     {
@@ -350,10 +383,12 @@ class LivePricing extends TravelService
      * Assign flight specific agents, carriers and legs to the each
      *
      * @param bool $onlyFirstAgentPerItinerary
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function beautifyFlights($onlyFirstAgentPerItinerary)
+    private function beautifyFlights($onlyFirstAgentPerItinerary): void
     {
-        list($agents, $carriers, $legs) = $this->getMeta();
+        [$agents, $carriers, $legs] = $this->getMeta();
         foreach ($this->flights as &$flight) {
             // Find and assign each agent by ID
             foreach ($flight['Agents'] as $key => &$flightAgent) {
@@ -390,42 +425,11 @@ class LivePricing extends TravelService
     /**
      * @return array
      */
-    protected function getSpecificSessionParameters()
+    protected function getDefaultParameters(): array
     {
-        return $this->filterArray([
-            'adults'           => $this->adults,
-            'cabinclass'       => $this->cabinclass,
-            'children'         => $this->children,
-            'destinationplace' => $this->destinationplace,
-            'groupPricing'     => $this->groupPricing,
-            'inbounddate'      => $this->inbounddate,
-            'infants'          => $this->infants,
-            'locationschema'   => $this->locationschema,
-            'originplace'      => $this->originplace,
-            'outbounddate'     => !empty($this->outbounddate) ? $this->outbounddate : date('Y-m-d', strtotime('+1 week'))
-        ]);
-    }
-
-    /**
-     * @return array
-     */
-    protected function getOptionalPollingParameters()
-    {
-        return $this->filterArray([
-            'destinationairports'     => $this->destinationairports,
-            'duration'                => $this->duration,
-            'excludecarriers'         => $this->excludecarriers,
-            'inbounddepartendtime'    => $this->inbounddepartendtime,
-            'inbounddepartstarttime'  => $this->inbounddepartstarttime,
-            'inbounddeparttime'       => $this->inbounddeparttime,
-            'includecarriers'         => $this->includecarriers,
-            'outbounddepartendtime'   => $this->outbounddepartendtime,
-            'outbounddepartstarttime' => $this->outbounddepartstarttime,
-            'outbounddeparttime'      => $this->outbounddeparttime,
-            'originairports'          => $this->originairports,
-            'stops'                   => $this->stops,
-            'sorttype'                => $this->sorttype,
-            'sortorder'               => $this->sortorder
+        return array_merge(parent::getDefaultParameters(), [
+            'Content-Type'    => 'application/x-www-form-urlencoded',
+            'X-Forwarded-For' => $this->getIpAddress()
         ]);
     }
 }

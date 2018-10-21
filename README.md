@@ -6,11 +6,10 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 This is an unofficial PHP SDK for the [Skyscanner's API](https://skyscanner.github.io/slate/)
-to support Flights, Car Hire, Localisation and Places services.
+to support Flights, Car Hire, Hotels, Localisation, and Places services.
 
-Currently, all of the services are implemented and tested.
-
-Note: Hotels service is missing, because it is currently unavailable.
+Currently, all of the services are implemented. Also tested all off the 
+services except Hotels since could not find valid API key to test it.
 
 ## Install
 
@@ -19,6 +18,8 @@ Via Composer
 ``` bash
 $ composer require ozdemirburak/skyscanner-php
 ```
+
+For PHP 7.0 and below, use `~1.0` instead.
 
 ## Usage
 
@@ -35,9 +36,9 @@ use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 $pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
 $pricing->setParameters([
     'adults' => 1,
-    'destinationplace' => 'IST',
-    'originplace' => 'LHR',
-    'outbounddate' => date('Y-m-d', strtotime('+1 week')),
+    'destinationPlace' => 'IST',
+    'originPlace' => 'LHR',
+    'outboundDate' => date('Y-m-d', strtotime('+1 week')),
     'stops' => 0
 ]);
 $flights = $pricing->getFlights($onlyFirstAgentPerItinerary = true);
@@ -71,6 +72,20 @@ $pricing->setParameters([
     'driverage' => 21
 ]);
 $cars = $pricing->getCars();
+```
+    
+### Hotels: Live Pricing
+
+``` php
+use OzdemirBurak\SkyScanner\Travel\Hotels\LivePricing;
+
+$pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$pricing->setParameters([
+    'entity_id'     => 27544008,
+    'checkin_date'  => date('Y-m-d', strtotime('+1 week')),
+    'checkout_date' => date('Y-m-d', strtotime('+2 week')),
+]);
+$hotels = $pricing->getHotels();
 ```
     
 ### Localisation: Currency

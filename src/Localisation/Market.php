@@ -31,7 +31,7 @@ class Market extends LocalisationService
     /**
      * @return string
      */
-    public function getUri()
+    public function getUri(): string
     {
         return 'reference/v1.0/countries/' . $this->locale;
     }

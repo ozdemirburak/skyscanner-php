@@ -20,6 +20,6 @@ class LocaleTest extends TestCase
      */
     public function testWithApiKey()
     {
-        $this->assertNotEmpty((new Locale(API_KEY))->get());
+        $this->assertNotEmpty((new Locale(API_KEY_1))->get());
     }
 }

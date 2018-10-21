@@ -16,7 +16,7 @@ class ConsoleTraitTest extends TestCase
     {
         $message = 'This is an ordinary message';
         $this->printMessage($message);
-        $this->expectOutputString($this->getMessageWithColor($message, $this->commentColor));
+        $this->expectOutputString($this->getMessageWithColor($message, $this->commentColor) . "\n");
     }
 
     /**
@@ -26,7 +26,7 @@ class ConsoleTraitTest extends TestCase
     {
         $message = 'This is a success message';
         $this->printSuccessMessage($message);
-        $this->expectOutputString($this->getMessageWithColor(join(' ', ['Success:', $message]), $this->infoColor));
+        $this->expectOutputString($this->getMessageWithColor(implode(' ', ['Success:', $message]), $this->infoColor) . "\n");
     }
 
     /**
@@ -36,7 +36,7 @@ class ConsoleTraitTest extends TestCase
     {
         $message = 'This is an error message';
         $this->printErrorMessage($message);
-        $this->expectOutputString($this->getMessageWithColor(join(' ', ['Failed:', $message]), $this->errorColor));
+        $this->expectOutputString($this->getMessageWithColor(implode(' ', ['Failed:', $message]), $this->errorColor) . "\n");
     }
 
     /**
@@ -46,6 +46,6 @@ class ConsoleTraitTest extends TestCase
     {
         $message = 'This is a message';
         $this->printMessage($message, 'invalid');
-        $this->expectOutputString($this->getMessageWithColor($message, $this->defaultColor));
+        $this->expectOutputString($this->getMessageWithColor($message, $this->defaultColor) . "\n");
     }
 }

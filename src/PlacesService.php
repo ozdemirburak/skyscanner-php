@@ -27,12 +27,16 @@ class PlacesService
      *
      * @return mixed
      * @throws \OzdemirBurak\SkyScanner\Exceptions\RestrictedMethodException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get()
     {
         $data = $this->request(implode('/', [$this->url, 'geo', 'v1.0']));
         if (empty($data)) {
-            throw new RestrictedMethodException('You don\'t have the permission to call this method, contact SkyScanner via https://partners.skyscanner.net/contact/ to request permission.');
+            throw new RestrictedMethodException(implode(' ', [
+                'You don\'t have the permission to call this method.',
+                'For more information, contact with Skyscanner here: https://partners.skyscanner.net/contact/'
+            ]));
         }
         return $data;
     }
@@ -46,12 +50,13 @@ class PlacesService
      * @param string $query
      *
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getList($country, $currency, $locale, $query)
     {
         $url = implode('/', [$this->url, 'autosuggest', 'v1.0', $country, $currency, $locale]);
         $data = $this->request($url, compact('query'));
-        return isset($data->Places) ? $data->Places : [];
+        return $data->Places ?? [];
     }
 
     /**
@@ -63,12 +68,13 @@ class PlacesService
      * @param string $id
      *
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getInformation($market, $currency, $locale, $id)
     {
         $url = implode('/', [$this->url, 'autosuggest', 'v1.0', $market, $currency, $locale]);
         $data = $this->request($url, compact('id'));
-        return isset($data->Places) ? $data->Places : [];
+        return $data->Places ?? [];
     }
 
     /**
@@ -82,6 +88,7 @@ class PlacesService
      * @param bool   $removeIds
      *
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getHotels($country, $currency, $locale, $query, $removeIds = true)
     {

@@ -13,12 +13,10 @@ class BrowseCacheTest extends TestCase
      */
     public function testUrl()
     {
-        $date = date('Y-m-d', strtotime('+1 week'));
-        $parameters = ['originPlace' => 'LHR', 'destinationPlace' => 'JFK', 'outboundPartialDate' => $date];
-        $url = 'http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/JFK/' . $date . '/';
         $cache = $this->getBrowseCache();
-        $cache->setParameters($parameters);
-        $this->assertEquals($cache->getUrl(), $url);
+        [$url, $parameters] = $cache->getRequestUrlAndParameters($cache->getUrl(), true);
+        $this->assertNotEmpty($parameters);
+        $this->assertEquals('http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/IST/' . date('Y-m-d', strtotime('+1 week')) . '/?apiKey=' . $cache->getParameter('apiKey'), $url);
     }
 
     /**
@@ -162,10 +160,18 @@ class BrowseCacheTest extends TestCase
     }
 
     /**
+     * @param array $parameters
+     *
      * @return \OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache
      */
-    private function getBrowseCache()
+    private function getBrowseCache(array $parameters = [])
     {
-        return new BrowseCache(API_KEY);
+        $cache = new BrowseCache(API_KEY_1);
+        $cache->setParameters(!empty($parameters) ? $parameters : [
+            'destinationPlace' => 'IST',
+            'originPlace' => 'LHR',
+            'outboundPartialDate' => date('Y-m-d', strtotime('+1 week'))
+        ]);
+        return $cache;
     }
 }

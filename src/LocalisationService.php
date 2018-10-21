@@ -20,7 +20,7 @@ abstract class LocalisationService
      *
      * @return string
      */
-    abstract public function getUri();
+    abstract public function getUri(): string;
 
     /**
      * LocalisationService constructor.
@@ -34,10 +34,11 @@ abstract class LocalisationService
 
     /**
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get()
     {
         $data = $this->request(implode('/', [$this->url, $this->getUri()]));
-        return isset($data->{$this->property}) ? $data->{$this->property} : $data;
+        return $data->{$this->property} ?? $data;
     }
 }

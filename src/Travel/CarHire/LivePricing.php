@@ -10,8 +10,33 @@ class LivePricing extends TravelService
     use ImageTrait;
 
     /**
-     * A list of website IDs whose results you want to discard, or an empty string
+     * API Endpoint
      *
+     * @var string
+     */
+    protected $endpoint = 'carhire/liveprices/v2/';
+
+    /**
+     * API Uri
+     *
+     * @var string
+     */
+    protected $uri = '{country}/{currency}/{locale}/{pickupplace}/{dropoffplace}/{pickupdatetime}/{dropoffdatetime}/{driverage}?apiKey={apiKey}&userip={userip}';
+
+    /**
+     * @var string
+     */
+    protected $uriSession = '?apiKey={apiKey}&deltaExcludeWebsites={deltaExcludeWebsites}';
+
+    /**
+     * Main data property that contains pricing information
+     *
+     * @var string
+     */
+    protected $property = 'cars';
+
+    /**
+     * A list of website IDs whose results you want to discard, or an empty string
      * Must be CSV or semicolon-separated values
      *
      * @var array|string
@@ -27,7 +52,6 @@ class LivePricing extends TravelService
 
     /**
      * Date and time for dropoff
-     *
      * Formatted as ISO Date and Time format (YYYY-MM-DDThh:mm)
      *
      * @var string
@@ -40,14 +64,12 @@ class LivePricing extends TravelService
      * IATA code or autosuggest place ID or a latitude,longitude pair formatted like 55.95,-3.37-latlong
      *
      * @link http://business.skyscanner.net/portal/en-GB/Documentation/HotelsAutoSuggest
-     *
      * @var string
      */
     protected $dropoffplace = 'MAN';
 
     /**
      * Date and time for pickup
-     *
      * Formatted as ISO Date and Time format (YYYY-MM-DDThh:mm)
      *
      * @var string
@@ -56,7 +78,6 @@ class LivePricing extends TravelService
 
     /**
      * The pickup location
-     *
      * IATA code or autosuggest place ID or a latitude,longitude pair formatted like 55.95,-3.37-latlong
      *
      * @link http://business.skyscanner.net/portal/en-GB/Documentation/HotelsAutoSuggest
@@ -80,85 +101,73 @@ class LivePricing extends TravelService
     protected $saveWebsiteImages = false;
 
     /**
-     * @return string
+     * Assign the return value of function getIpAddress() to userip
+     *
+     * @var array
      */
-    public function getUrl()
+    protected $extraParameters = ['userip' => 'getIpAddress'];
+
+    /**
+     * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getUrl(): string
     {
-        $this->url .= 'carhire/liveprices/v2/';
-        $uri = '{country}/{currency}/{locale}/{pickupplace}/{dropoffplace}/{pickupdatetime}/{dropoffdatetime}/{driverage}';
-        $url = $this->url . $this->replaceParameters($uri);
-        $url = $this->url . $this->getSessionKey($url, 'GET');
-        return $url;
+        [$id, $this->uri] = [$this->getSessionId($this->url . $this->endpoint, 'GET'), $this->uriSession];
+        return $this->url . $this->endpoint . $id;
     }
 
     /**
-     * @return array
+     * @return array|bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getCars()
     {
         if ($this->init()) {
-            $properties = ['car_class_id' => ['car_class', 'car_classes'], 'image_id' => ['car_image', 'images'], 'website_id' => ['website', 'websites']];
+            $properties = [
+                'car_class_id' => ['car_class', 'car_classes'],
+                'image_id'     => ['car_image', 'images'],
+                'website_id'   => ['website', 'websites']
+            ];
             foreach ($this->data->cars as &$car) {
                 // assign car class, image and website
                 foreach ($properties as $key => $values) {
-                    $id = $this->arraySearch($car->$key, $this->data->{$values[1]}, 'id');
-                    $car->{$values[0]} = $this->data->{$values[1]}[$id];
+                    if (isset($this->data->{$values[1]})) {
+                        $id = $this->arraySearch($car->$key, $this->data->{$values[1]}, 'id');
+                        $car->{$values[0]} = $this->data->{$values[1]}[$id];
+                    }
                 }
                 // remove IDs
                 if ($this->removeIds === true) {
                     unset($car->car_class_id, $car->image_id, $car->website_id);
                 }
                 // save images
-                $imageProperties = ['saveWebsiteImages' => ['website', 'image_url'], 'saveCarImages' => ['car_image', 'url']];
+                $imageProperties = [
+                    'saveWebsiteImages' => ['website', 'image_url'],
+                    'saveCarImages'     => ['car_image', 'url']
+                ];
                 foreach ($imageProperties as $boolean => $property) {
                     if ($this->$boolean === true) {
-                        $car->{$property[0]}->{$property[1]} = $this->saveImage($car->{$property[0]}->{$property[1]}, $this->savePath);
+                        $car->{$property[0]}->{$property[1]} = $this->saveImage(
+                            $car->{$property[0]}->{$property[1]},
+                            $this->savePath
+                        );
                     }
                 }
             }
-        } else {
-            $this->printErrorMessage($this->getResponseMessage());
+            return $this->data->cars;
         }
-        return $this->data->cars;
-    }
-
-    /**
-     * Initialize and store data
-     *
-     * @return bool
-     */
-    private function init()
-    {
-        $this->get();
-        return !empty($this->data->cars);
+        $this->printErrorMessage($this->getResponseMessage());
+        return [];
     }
 
     /**
      * @return array
      */
-    protected function getSpecificSessionParameters()
+    protected function getDefaultParameters(): array
     {
-        return $this->filterArray([
-            'driverage'         => $this->driverage,
-            'dropoffplace'      => $this->dropoffplace,
-            'pickupplace'       => $this->pickupplace,
-            'pickupdatetime'    => !empty($this->pickupdatetime) ? $this->pickupdatetime :
-                                   date('Y-m-d\TH:i', strtotime('+1 week')),
-            'dropoffdatetime'   => !empty($this->dropoffdatetime) ? $this->dropoffdatetime :
-                                   date('Y-m-d\TH:i', strtotime('+2 week'))
-        ]);
-    }
-
-    /**
-     * @return array
-     */
-    protected function getOptionalPollingParameters()
-    {
-        return $this->filterArray([
-            'userip'               => $this->getXForwardedFor(),
-            'deltaExcludeWebsites' => is_array($this->deltaExcludeWebsites) ?
-                implode(',', $this->deltaExcludeWebsites) :
-                $this->deltaExcludeWebsites
+        return array_merge(parent::getDefaultParameters(), [
+            'Content-Type' => 'application/x-www-form-urlencoded'
         ]);
     }
 }

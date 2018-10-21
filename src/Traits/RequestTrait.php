@@ -26,6 +26,7 @@ trait RequestTrait
      * @param string $requestMethod
      *
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function request($url, array $parameters = [], $requestMethod = 'GET')
     {
@@ -45,7 +46,7 @@ trait RequestTrait
     /**
      * @return \GuzzleHttp\Client
      */
-    public function getClient()
+    public function getClient(): Client
     {
         return new Client();
     }
@@ -53,7 +54,7 @@ trait RequestTrait
     /**
      * @return array
      */
-    protected function getParams()
+    protected function getParams(): array
     {
         return ['apiKey' => $this->apiKey];
     }

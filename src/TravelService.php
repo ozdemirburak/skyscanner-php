@@ -18,7 +18,7 @@ abstract class TravelService
      *
      * @var string
      */
-    protected $apiKey = '';
+    protected $apiKey;
 
     /**
      * @var \GuzzleHttp\Client
@@ -51,6 +51,28 @@ abstract class TravelService
     protected $data;
 
     /**
+     * SkyScanner Service Endpoint
+     *
+     * @var string
+     */
+    protected $endpoint;
+
+    /**
+     * Instead of declaring some parameters, one can use this variable to assign parameter value by function.
+     * Example: ['ip' => getIpAddress] => assigns the value of getIpAddress to ip in getParameters(), getUri() methods.
+     *
+     * @var array
+     */
+    protected $extraParameters = [];
+
+    /**
+     * Client IP, needed for X-Forwarded-For value
+     *
+     * @var string
+     */
+    protected $ip;
+
+    /**
      * ISO locale code (language and country)
      *
      * @link https://msdn.microsoft.com/en-us/library/ee825488(v=cs.20).aspx
@@ -79,11 +101,25 @@ abstract class TravelService
     protected $url = 'http://partners.api.skyscanner.net/apiservices/';
 
     /**
+     * SkyScanner Service URI
+     *
+     * @var string
+     */
+    protected $uri;
+
+    /**
+     * Main data properties that contains information about Travel Services like "cars", "Itineraries" etc.
+     *
+     * @var string
+     */
+    protected $property;
+
+    /**
      * URL to make the query
      *
      * @return string
      */
-    abstract public function getUrl();
+    abstract public function getUrl(): string;
 
     /**
      * Auth constructor.
@@ -105,7 +141,7 @@ abstract class TravelService
      * @param $variableName
      * @param $variableValue
      */
-    public function assignVariableOrDefault($variableName, $variableValue)
+    public function assignVariableOrDefault($variableName, $variableValue): void
     {
         $this->$variableName = !empty($variableValue) ? $variableValue : $this->$variableName;
     }
@@ -113,7 +149,7 @@ abstract class TravelService
     /**
      * @param $parameters
      */
-    public function setParameters(array $parameters)
+    public function setParameters(array $parameters): void
     {
         foreach ($parameters as $property => $value) {
             if (property_exists($this, $property)) {
@@ -125,16 +161,16 @@ abstract class TravelService
     }
 
     /**
-     * @param string $method
      * @param string $url
-     * @param array  $parameters
+     * @param string $method
      *
      * @return bool|mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function makeRequest($method = 'GET', $url = '', array $parameters = [])
+    public function makeRequest($url, $method = 'GET')
     {
         try {
-            $parameters = !empty($parameters) ? $parameters : $this->getRequestParameters(strtolower($method) === 'get');
+            [$url, $parameters] = $this->getRequestUrlAndParameters($url, $method === 'GET');
             return $this->response = $this->client->request($method, $url, $parameters);
         } catch (RequestException $e) {
             $this->printErrorMessage(Psr7\str($e->getRequest()), false);
@@ -147,37 +183,36 @@ abstract class TravelService
     }
 
     /**
-     * The parameters used for the requests to the Skyscanner API
-     *
-     * @param bool $isGet
-     *
-     * @return array
-     */
-    public function getParameters($isGet = true)
-    {
-        return array_merge([
-            'apiKey'   => $this->apiKey,
-            'country'  => $this->country,
-            'currency' => $this->currency,
-            'locale'   => $this->locale
-        ], $this->getSpecificSessionParameters(), $isGet ? $this->getOptionalPollingParameters() : []);
-    }
-
-    /**
      * Just return data property without doing any modifications to the original one
      *
      * @param string $property
      * @param bool   $reset
      *
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function get($property = null, $reset = false)
     {
         if (empty($this->data) || $reset === true) {
-            $this->makeRequest('GET', $this->getUrl());
+            $this->makeRequest($this->getUrl(), 'GET');
             $this->data = $this->getResponseBody();
         }
-        return !empty($property) ? $this->data->{$property} : $this->data;
+        if ($property !== null) {
+            return $this->data->{$property} ?? [];
+        }
+        return $this->data;
+    }
+
+    /**
+     * Initialize and store data
+     *
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function init(): bool
+    {
+        $this->get();
+        return !empty($this->data->{$this->property});
     }
 
     /**
@@ -187,8 +222,7 @@ abstract class TravelService
      */
     public function getParameter($key)
     {
-        $parameters = $this->getParameters();
-        return isset($parameters[$key]) ? $parameters[$key] : null;
+        return $this->$key ?? null;
     }
 
     /**
@@ -196,7 +230,7 @@ abstract class TravelService
      *
      * @return integer
      */
-    public function getResponseStatus()
+    public function getResponseStatus(): int
     {
         return $this->response->getStatusCode();
     }
@@ -244,10 +278,10 @@ abstract class TravelService
      *
      * @return string
      */
-    public function getResponseHeader($key, $first = true)
+    public function getResponseHeader($key, $first = true): string
     {
         $header = $this->response->getHeader($key);
-        $headerFirst = isset($header[0]) ? $header[0] : '';
+        $headerFirst = $header[0] ?? '';
         return $first ? $headerFirst : $header;
     }
 
@@ -256,9 +290,9 @@ abstract class TravelService
      *
      * @return \GuzzleHttp\Client
      */
-    public function getClient()
+    public function getClient(): Client
     {
-        return empty($this->client) ? new Client() : $this->client;
+        return $this->client ?? new Client();
     }
 
     /**
@@ -269,73 +303,116 @@ abstract class TravelService
      *
      * @param string $url
      * @param string $method
-     * @param string $location
      *
      * Message: Rate limit has been exceeded: 100 PerMinute for PricingSession
      *
-     * @return string
+     * @return bool|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function getSessionKey($url, $method = 'POST', $location = '')
+    protected function getSessionId($url, $method = 'POST')
     {
-        while (empty($location)) {
-            $this->makeRequest($method, $url);
-            $location = $this->getResponseHeader('Location');
+        if ($this->makeRequest($url, $method) === false) {
+            $this->printErrorMessage('Could not fetch a valid session id.');
+            return false;
         }
+        $location = $this->getResponseHeader('Location');
         $locationParameters = explode('/', $location);
-        return end($locationParameters);
+        $id = end($locationParameters);
+        if (strpos($id, '?') !== false) {
+            // cars live pricing return apikey within the session for some reason.
+            [$id, $others] = explode('?', $id, 2);
+        }
+        return $id;
     }
 
     /**
-     * @param bool $isGet
+     * @param string $url
+     * @param bool  $isGet
      *
      * @return array
      */
-    protected function getRequestParameters($isGet = true)
+    public function getRequestUrlAndParameters($url, $isGet): array
     {
-        return [
-            $this->getMethod($isGet) => $this->getParameters($isGet),
-            'Accept' => 'application/json'
-        ];
+        if ($isGet === true) {
+            return [$url . $this->getUri(), $this->getDefaultParameters()];
+        }
+        return [$url, array_merge($this->getDefaultParameters(), ['form_params' => $this->getParameters()])];
     }
 
     /**
-     * @param bool $isGet
+     * Default parameters for requests
+     *
+     * @return array
+     */
+    protected function getDefaultParameters(): array
+    {
+        return ['Accept' => 'application/json'];
+    }
+
+    /**
+     * Create direct query link via replacing uri
      *
      * @return string
      */
-    protected function getMethod($isGet = true)
+    public function getUri(): string
     {
-        return $isGet === true ? 'query' : 'form_params';
-    }
-
-    /**
-     * Replace parameters within the given string with their values.
-     * For instance replace the string {currency} with the string USD
-     *
-     * @param string $string
-     *
-     * @return mixed
-     */
-    protected function replaceParameters($string)
-    {
-        foreach ($this->getParameters() as $parameter => $value) {
-            $search = '{' . $parameter . '}';
-            if (strpos($string, $search) !== false) {
-                $string = str_replace($search, $value, $string);
+        foreach ($this->getParameterArray() as $parameter) {
+            if (property_exists($this, $parameter)) {
+                if (isset($this->$parameter)) {
+                    $this->uri = str_replace('{' . $parameter . '}', $this->$parameter, $this->uri);
+                } else {
+                    $this->uri = str_replace('&'. $parameter . '={' . $parameter . '}', '', $this->uri);
+                }
             }
         }
-        return $string;
+        foreach ($this->extraParameters as $parameter => $function) {
+            $this->uri = str_replace('{' . $parameter . '}', $this->$function(), $this->uri);
+        }
+        return $this->uri;
     }
 
     /**
+     * Get parameter array to create query string from parameters
+     *
+     * @param array $parameters
+     *
+     * @return array
+     */
+    public function getParameters(array $parameters = []): array
+    {
+        foreach (array_merge($parameters, $this->getParameterArray()) as $parameter) {
+            if (isset($this->$parameter)) {
+                $parameters[$parameter] = $this->$parameter;
+            }
+        }
+        foreach ($this->extraParameters as $parameter => $function) {
+            $parameters[$parameter] = $this->$function();
+        }
+        return $this->filterArray($parameters);
+    }
+
+    /**
+     * Get everything between {curly braces} in uri string
+     *
+     * @return array
+     */
+    protected function getParameterArray(): array
+    {
+        preg_match_all('/{(.*?)}/', $this->uri, $parameters);
+        return $parameters[1];
+    }
+
+    /**
+     * Filter array and return not empty ones (allows 0 and false)
+     *
      * @param array $array
      *
      * @return array
      */
-    protected function filterArray(array $array)
+    protected function filterArray(array $array): array
     {
         return array_filter($array, function ($value) {
-            return ($value !== null && $value !== false && $value !== '');
+            return $value !== null && $value !== '';
         });
     }
 
@@ -346,25 +423,51 @@ abstract class TravelService
      * @param $haystack
      * @param $property
      *
-     * @return mixed
+     * @return false|int|string
      */
     protected function arraySearch($needle, $haystack, $property)
     {
         return array_search($needle, array_map(function ($value) use ($property) {
-            return is_object($value) ? $value->$property : $value[$property];
+            return \is_object($value) ? $value->$property : $value[$property];
         }, $haystack), true);
     }
 
     /**
-     * Get the X-Forwarded-For
+     * Get IP Address
      *
+     * @link https://gist.github.com/cballou/2201933
      * @return string
      */
-    protected function getXForwardedFor()
+    public function getIpAddress(): string
     {
-        return !empty($this->ip) ? $this->ip :
-            getenv('HTTP_CLIENT_IP') ?: getenv('HTTP_X_FORWARDED_FOR') ?: getenv('HTTP_X_FORWARDED') ?:
-                getenv('HTTP_FORWARDED_FOR') ?: getenv('HTTP_FORWARDED') ?: getenv('REMOTE_ADDR') ?: '127.0.0.1';
+        if ($this->ip !== null) {
+            return $this->ip;
+        }
+        $keys = [
+            'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'
+        ];
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    if ($this->validateIp($ip = trim($ip))) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    }
+
+    /**
+     * @param $ip
+     *
+     * @return mixed
+     */
+    protected function validateIp($ip)
+    {
+        $filter = FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+        return filter_var($ip, FILTER_VALIDATE_IP, $filter);
     }
 
     /**
@@ -372,7 +475,7 @@ abstract class TravelService
      *
      * @return array
      */
-    protected function getResponseMessages()
+    protected function getResponseMessages(): array
     {
         return [
             200 => 'Success',
@@ -385,25 +488,5 @@ abstract class TravelService
             429 => 'Too Many Requests – There have been too many requests in the last minute.',
             500 => 'Server Error – An internal server error has occurred which has been logged.'
         ];
-    }
-
-    /**
-     * Class specific post parameters for creating the session
-     *
-     * @return array
-     */
-    protected function getSpecificSessionParameters()
-    {
-        return [];
-    }
-
-    /**
-     * Class specific get parameters for polling the results
-     *
-     * @return array
-     */
-    protected function getOptionalPollingParameters()
-    {
-        return [];
     }
 }

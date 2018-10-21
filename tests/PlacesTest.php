@@ -51,6 +51,6 @@ class PlacesTest extends TestCase
      */
     private function getPlaces()
     {
-        return new PlacesService(API_KEY);
+        return new PlacesService(API_KEY_1);
     }
 }

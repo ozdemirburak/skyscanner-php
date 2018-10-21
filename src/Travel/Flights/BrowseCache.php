@@ -8,6 +8,27 @@ use OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException;
 class BrowseCache extends TravelService
 {
     /**
+     * API Endpoint
+     *
+     * @var string
+     */
+    protected $endpoint = '{method}/v1.0/';
+
+    /**
+     * API Uri
+     *
+     * @var string
+     */
+    protected $uri = '{country}/{currency}/{locale}/{originPlace}/{destinationPlace}/{outboundPartialDate}/{inboundPartialDate}?apiKey={apiKey}';
+
+    /**
+     * Main data property that contains pricing information
+     *
+     * @var string
+     */
+    protected $property = 'Quotes';
+
+    /**
      * The destination city or airport
      *
      * Specified location schema, or Skyscanner Rnid
@@ -23,13 +44,6 @@ class BrowseCache extends TravelService
      * @var bool
      */
     protected $flattenSingleCarrier = true;
-
-    /**
-     * Needed for X-Forwarded-For
-     *
-     * @var string
-     */
-    protected $ip;
 
     /**
      * @var string
@@ -50,7 +64,7 @@ class BrowseCache extends TravelService
      *
      * @var string
      */
-    protected $inboundPartialDate;
+    protected $inboundPartialDate = '';
 
     /**
      * The departure date
@@ -78,20 +92,21 @@ class BrowseCache extends TravelService
     /**
      * @return string
      */
-    public function getUrl()
+    public function getUrl(): string
     {
-        $uri = '{country}/{currency}/{locale}/{originPlace}/{destinationPlace}/{outboundPartialDate}/{inboundPartialDate}';
-        $this->url = str_replace('{method}', $this->method, $this->url . '{method}/v1.0/') . $this->replaceParameters($uri);
-        return $this->url;
+        return str_replace('{method}', $this->method, $this->url . $this->endpoint);
     }
 
     /**
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException
      */
-    public function getPrices()
+    public function getPrices(): array
     {
         if ($this->init()) {
+            // reset price data
+            $this->prices = [];
             // If method is grid or routes, then there may not be any quotes
             if (!empty($this->data->Quotes)) {
                 $this->prices['Quotes'] = $this->addQuotes();
@@ -139,7 +154,7 @@ class BrowseCache extends TravelService
                         $carrier = $this->arraySearch($carrierId, $this->data->Carriers, 'CarrierId');
                         $quote->Carriers[] = $this->data->Carriers[$carrier];
                     }
-                    if ($this->flattenSingleCarrier === true && count($quote->$leg->CarrierIds) === 1) {
+                    if ($this->flattenSingleCarrier === true && \count($quote->$leg->CarrierIds) === 1) {
                         $quote->Carrier = $quote->Carriers[0];
                         unset($quote->Carriers);
                     }
@@ -172,7 +187,7 @@ class BrowseCache extends TravelService
      *
      * @return array
      */
-    protected function addRoutes(array $routes = [])
+    protected function addRoutes(array $routes = []): array
     {
         foreach ($this->data->Routes as $key => $route) {
             foreach (['Origin' => 'OriginId', 'Destination' => 'DestinationId'] as $index => $identifier) {
@@ -233,7 +248,7 @@ class BrowseCache extends TravelService
      *
      * @link     http://business.skyscanner.net/portal/en-GB/Documentation/FlightsBrowseCacheGrid
      */
-    protected function addGrid(array $grid = [])
+    protected function addGrid(array $grid = []): array
     {
         if (isset($this->data->Dates[1])) {
             foreach ($this->data->Dates[1] as $key => $object) {
@@ -269,7 +284,7 @@ class BrowseCache extends TravelService
      *
      * @return string
      */
-    protected function getReferralUrl()
+    protected function getReferralUrl(): string
     {
         return str_replace($this->method, 'referral', $this->url) . '?apiKey=' . substr($this->apiKey, 0, 16);
     }
@@ -277,40 +292,24 @@ class BrowseCache extends TravelService
     /**
      * @return bool
      * @throws \OzdemirBurak\SkyScanner\Exceptions\InvalidMethodException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    private function init()
+    protected function init(): bool
     {
-        if (!in_array($this->method, $this->methods, true)) {
+        if (!\in_array($this->method, $this->methods, true)) {
             throw new InvalidMethodException('Invalid Browse Cache method');
         }
-        $this->prices = [];
         $this->get();
         return $this->getResponseStatus() === 200;
     }
 
     /**
-     * @param bool $isGet
-     *
      * @return array
      */
-    protected function getRequestParameters($isGet = true)
+    protected function getDefaultParameters(): array
     {
-        return array_merge(parent::getRequestParameters($isGet), [
-            'X-Forwarded-For' => $this->getXForwardedFor()
+        return array_merge(parent::getDefaultParameters(), [
+            'X-Forwarded-For' => $this->getIpAddress()
         ]);
-    }
-
-    /**
-     * @return array
-     */
-    protected function getOptionalPollingParameters()
-    {
-        return [
-            'destinationPlace'    => $this->destinationPlace,
-            'inboundPartialDate'  => $this->inboundPartialDate,
-            'originPlace'         => $this->originPlace,
-            'outboundPartialDate' => !empty($this->outboundPartialDate) ? $this->outboundPartialDate :
-                                     date('Y-m', strtotime('+1 month'))
-        ];
     }
 }

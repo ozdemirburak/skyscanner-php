@@ -1,23 +1,24 @@
 {
     "name": "ozdemirburak/skyscanner-php",
     "description": "Unofficial PHP SDK for Skyscanner's API",
-    "keywords": ["skyscanner", "skyscanner-api", "flight", "travel", "trip"],
+    "keywords": ["skyscanner", "skyscanner-api", "flight", "travel", "trip", "car hire", "hotels"],
     "homepage": "https://github.com/ozdemirburak/skyscanner-php",
     "license": "MIT",
     "authors": [
         {
             "name": "Burak Özdemir",
             "email": "mail@burakozdemir.co.uk",
-            "homepage": "https://burakozdemir.co.uk"
+            "homepage": "https://ozdemirburak.com"
         }
     ],
     "require": {
-        "php" : "~5.5|~7.0",
-        "guzzlehttp/guzzle": "~6.0"
+        "php" : "~7.1",
+        "guzzlehttp/guzzle": "~6.0",
+        "ext-json": "*"
     },
     "require-dev": {
-        "phpunit/phpunit" : "~5.0|~6.0",
-        "symfony/var-dumper": "~2.8|~3.2"
+        "phpunit/phpunit" : "~6.0|~7.0",
+        "symfony/var-dumper": "~3.2"
     },
     "autoload": {
         "psr-4": { "OzdemirBurak\\SkyScanner\\": "src" },

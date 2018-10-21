@@ -31,7 +31,8 @@ class LivePricingTest extends TestCase
         $this->assertContains($status, [200, 304]);
         if ($status !== 304) {
             $this->assertNotEmpty($data);
-            foreach (['Agents', 'Carriers', 'Currencies', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'] as $property) {
+            $properties = ['Agents', 'Carriers', 'Legs', 'Itineraries', 'Places', 'Segments', 'SessionKey', 'Status'];
+            foreach ($properties as $property) {
                 $data = $pricing->get($property);
                 $this->assertNotEmpty($data);
             }
@@ -74,7 +75,7 @@ class LivePricingTest extends TestCase
     public function testRoundDirect()
     {
         $pricing = $this->getLivePricing();
-        $pricing->setParameters(['inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
+        $pricing->setParameters(['inboundDate' => date('Y-m-d', strtotime('+2 week'))]);
         $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
@@ -89,7 +90,7 @@ class LivePricingTest extends TestCase
     public function testRoundWithOneStop()
     {
         $pricing = $this->getLivePricing();
-        $pricing->setParameters(['stops' => 1, 'inbounddate' => date('Y-m-d', strtotime('+2 week'))]);
+        $pricing->setParameters(['stops' => 1, 'inboundDate' => date('Y-m-d', strtotime('+2 week'))]);
         $flights = $pricing->getFlights();
         $status = $pricing->getResponseStatus();
         $this->assertContains($status, [200, 304]);
@@ -99,10 +100,20 @@ class LivePricingTest extends TestCase
     }
 
     /**
+     * @param array $parameters
+     *
      * @return \OzdemirBurak\SkyScanner\Travel\Flights\LivePricing
      */
-    private function getLivePricing()
+    private function getLivePricing(array $parameters = [])
     {
-        return new LivePricing(API_KEY);
+        $cache = new LivePricing(API_KEY_1);
+        $cache->setParameters(!empty($parameters) ? $parameters : [
+            'adults' => 1,
+            'destinationPlace' => 'IST',
+            'originPlace' => 'LHR',
+            'outboundDate' => date('Y-m-d', strtotime('+1 week')),
+            'stops' => 0
+        ]);
+        return $cache;
     }
 }
