@@ -1,11 +1,11 @@
-# Unofficial PHP SDK for Skyscanner's API
+# Unofficial PHP SDK for Skyscanner API
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-This is an unofficial PHP SDK for the [Skyscanner's API](https://skyscanner.github.io/slate/)
+This is an unofficial PHP SDK for the [Skyscanner API](https://skyscanner.github.io/slate/)
 to support Flights, Car Hire, Hotels, Localisation, and Places services.
 
 Currently, all of the services are implemented. Also tested all off the 
@@ -139,7 +139,7 @@ $ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Credits
 
