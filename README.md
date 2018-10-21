@@ -8,8 +8,8 @@
 This is an unofficial PHP SDK for the [Skyscanner API](https://skyscanner.github.io/slate/)
 to support Flights, Car Hire, Hotels, Localisation, and Places services.
 
-Currently, all of the services are implemented. Also tested all off the 
-services except Hotels since could not find valid API key to test it.
+Currently, all of the services are implemented. Also tested properly all off the services except the Hotels one 
+since could not find any valid API keys, and had no luck with contacting anyone from Skyscanner.
 
 ## Install
 
