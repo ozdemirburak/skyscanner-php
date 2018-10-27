@@ -27,7 +27,7 @@ abstract class LocalisationService
      *
      * @param $apiKey
      */
-    public function __construct($apiKey = '')
+    public function __construct($apiKey)
     {
         $this->apiKey = $apiKey;
     }

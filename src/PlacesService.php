@@ -14,7 +14,7 @@ class PlacesService
      *
      * @param string $apiKey
      */
-    public function __construct($apiKey = '')
+    public function __construct($apiKey)
     {
         $this->apiKey = $apiKey;
     }

@@ -2,6 +2,10 @@
 
 All Notable changes to `skyscanner-php` will be documented in this file
 
+## 2018-10-27
+- Remove country, currency and locale initialization from constructor.
+- Remove `dd` helper.
+
 ## 2018-10-21
 - Added experimental Hotels\LivePricing
 - Remove support for PHP 7.0 and below.

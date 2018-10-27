@@ -125,25 +125,11 @@ abstract class TravelService
      * Auth constructor.
      *
      * @param string $apiKey
-     * @param string $country
-     * @param string $currency
-     * @param string $locale
      */
-    public function __construct($apiKey = '', $country = '', $currency = '', $locale = '')
+    public function __construct($apiKey)
     {
-        foreach (['apiKey', 'country', 'currency', 'locale'] as $variable) {
-            $this->assignVariableOrDefault($variable, $$variable);
-        }
+        $this->apiKey = $apiKey;
         $this->client = $this->getClient();
-    }
-
-    /**
-     * @param $variableName
-     * @param $variableValue
-     */
-    public function assignVariableOrDefault($variableName, $variableValue): void
-    {
-        $this->$variableName = !empty($variableValue) ? $variableValue : $this->$variableName;
     }
 
     /**
@@ -238,9 +224,9 @@ abstract class TravelService
     /**
      * @param bool $withStatusCode
      *
-     * @return mixed|string
+     * @return string
      */
-    public function getResponseMessage($withStatusCode = true)
+    public function getResponseMessage($withStatusCode = true): string
     {
         $message = array_key_exists($status = $this->getResponseStatus(), $messages = $this->getResponseMessages()) ?
             $messages[$status] : 'Unknown response';
@@ -456,7 +442,7 @@ abstract class TravelService
                 }
             }
         }
-        return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        return '127.0.0.1';
     }
 
     /**

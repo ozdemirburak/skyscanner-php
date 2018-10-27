@@ -14,18 +14,14 @@ class Market extends LocalisationService
     /**
      * @var string
      */
-    protected $locale;
+    protected $locale = 'en-GB';
 
     /**
-     * Market constructor.
-     *
-     * @param string $apiKey
      * @param string $locale
      */
-    public function __construct($apiKey, $locale = 'en-GB')
+    public function setLocale($locale): void
     {
         $this->locale = $locale;
-        parent::__construct($apiKey);
     }
 
     /**

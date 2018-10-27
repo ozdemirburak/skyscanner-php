@@ -8,7 +8,7 @@
 This is an unofficial PHP SDK for the [Skyscanner API](https://skyscanner.github.io/slate/)
 to support Flights, Car Hire, Hotels, Localisation, and Places services.
 
-Currently, all of the services are implemented. Also tested properly all off the services except the Hotels one 
+Currently, all of the services are implemented. Also tested all off the services except the Hotels one
 since could not find any valid API keys, and had no luck with contacting anyone from Skyscanner.
 
 ## Install
@@ -33,10 +33,13 @@ You can find a simple demonstration of how to use the methods below, or check th
 ``` php
 use OzdemirBurak\SkyScanner\Travel\Flights\LivePricing;
 
-$pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$pricing = new LivePricing($apiKey = 'your-api-key');
 $pricing->setParameters([
     'adults' => 1,
+    'country' => 'GB',
+    'currency' => 'GBP',
     'destinationPlace' => 'IST',
+    'locale' => 'en-GB',
     'originPlace' => 'LHR',
     'outboundDate' => date('Y-m-d', strtotime('+1 week')),
     'stops' => 0
@@ -49,9 +52,12 @@ $flights = $pricing->getFlights($onlyFirstAgentPerItinerary = true);
 ``` php
 use OzdemirBurak\SkyScanner\Travel\Flights\BrowseCache;
 
-$cache = new BrowseCache($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$cache = new BrowseCache($apiKey = 'your-api-key');
 $cache->setParameters([
+    'country' => 'TR',
+    'currency' => 'TRY',
     'destinationPlace' => 'IST',
+    'locale' => 'tr-TR',
     'originPlace' => 'LHR',
     'outboundPartialDate' => date('Y-m-d', strtotime('+1 week')),
 ]);
@@ -63,10 +69,13 @@ $quotes = $cache->getPrices()['Quotes'];
 ``` php
 use OzdemirBurak\SkyScanner\Travel\CarHire\LivePricing;
 
-$pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$pricing = new LivePricing($apiKey = 'your-api-key');
 $pricing->setParameters([
+    'country' => 'GB',
+    'currency' => 'GBP',
     'dropoffplace' => 'ADB',
     'dropoffdatetime' => date('Y-m-d\TH:i', strtotime('+2 week')),
+    'locale' => 'en-GB',
     'pickupplace' => 'IST',
     'pickupdatetime' => date('Y-m-d\TH:i', strtotime('+1 week')),
     'driverage' => 21
@@ -79,11 +88,14 @@ $cars = $pricing->getCars();
 ``` php
 use OzdemirBurak\SkyScanner\Travel\Hotels\LivePricing;
 
-$pricing = new LivePricing($apiKey = 'your-api-key', $country = 'GB', $currency = 'GBP', $locale = 'en-GB');
+$pricing = new LivePricing($apiKey = 'your-api-key');
 $pricing->setParameters([
+    'country'       => 'TR',
+    'currency'      => 'TRY',
     'entity_id'     => 27544008,
     'checkin_date'  => date('Y-m-d', strtotime('+1 week')),
     'checkout_date' => date('Y-m-d', strtotime('+2 week')),
+    'locale'        => 'tr-TR'
 ]);
 $hotels = $pricing->getHotels();
 ```
@@ -111,7 +123,8 @@ $locales = $locale->get();
 ``` php
 use OzdemirBurak\SkyScanner\Localisation\Market;
 
-$market = new Market($apiKey = 'your-api-key', $locale = 'en-GB'));
+$market = new Market($apiKey = 'your-api-key'));
+$market->setLocale('en-GB');
 $countries = $market->get();
 ```
 
