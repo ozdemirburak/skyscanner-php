@@ -111,6 +111,6 @@ trait ConsoleTrait
      */
     private function isPrintable($force = true): bool
     {
-        return !($force === false && strpos($_SERVER['argv'][0], 'phpunit') !== false);
+        return !($force === false && strpos(($_SERVER['argv'][0]) ?? null, 'phpunit') !== false);
     }
 }
