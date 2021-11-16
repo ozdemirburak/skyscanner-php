@@ -13,7 +13,7 @@ trait RequestTrait
     /**
      * @var string
      */
-    protected $url = 'http://partners.api.skyscanner.net/apiservices';
+    protected $url = 'https://partners.api.skyscanner.net/apiservices';
 
     /**
      * @var string

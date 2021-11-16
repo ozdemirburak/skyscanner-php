@@ -7,7 +7,7 @@ trait ReferralTrait
     /**
      * @var string
      */
-    protected $referralUrl = 'http://partners.api.skyscanner.net/apiservices/referral/v1.0/';
+    protected $referralUrl = 'https://partners.api.skyscanner.net/apiservices/referral/v1.0/';
 
     /**
      * @param $country

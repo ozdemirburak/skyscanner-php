@@ -16,7 +16,7 @@ class BrowseCacheTest extends TestCase
         $cache = $this->getBrowseCache();
         [$url, $parameters] = $cache->getRequestUrlAndParameters($cache->getUrl(), true);
         $this->assertNotEmpty($parameters);
-        $this->assertEquals('http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/IST/' . date('Y-m-d', strtotime('+1 week')) . '/?apiKey=' . $cache->getParameter('apiKey'), $url);
+        $this->assertEquals('https://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/GB/GBP/en-GB/LHR/IST/' . date('Y-m-d', strtotime('+1 week')) . '/?apiKey=' . $cache->getParameter('apiKey'), $url);
     }
 
     /**

@@ -98,7 +98,7 @@ abstract class TravelService
      *
      * @var string
      */
-    protected $url = 'http://partners.api.skyscanner.net/apiservices/';
+    protected $url = 'https://partners.api.skyscanner.net/apiservices/';
 
     /**
      * SkyScanner Service URI
